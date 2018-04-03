@@ -1,0 +1,35 @@
+{
+    "name": "tomaj/omnipay-viamo",
+    "type": "library",
+    "description": "Viamo driver for the Omnipay payment processing library",
+    "keywords": [
+        "viamo",
+        "gateway",
+        "merchant",
+        "omnipay",
+        "pay",
+        "payment"
+    ],
+    "homepage": "https://github.com/tomaj/omnipay-viamo",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tomas Majer",
+            "email": "tomasmajer@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": { 
+            "Omnipay\\": "src/"
+        }
+    },
+    "require": {
+        "omnipay/common": "~2.0"
+    },
+    "require-dev": {
+        "omnipay/tests": "~2.0"
+    },
+    "scripts": {
+        "test": "phpunit"
+    }
+}
