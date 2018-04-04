@@ -5,16 +5,21 @@ namespace Omnipay\Viamo\Message;
 use Omnipay\Common\Message\AbstractResponse;
 use Omnipay\Common\Message\RedirectResponseInterface;
 
-class PurchaseResponse extends AbstractResponse // implements RedirectResponseInterface
+class WebhookResponse extends AbstractResponse
 {
     public function isSuccessful()
     {
-        return true;
+        return $this->data['success'];
     }
 
     public function isRedirect()
     {
         return false;
+    }
+
+    public function errorMessage()
+    {
+        return $this->data['error'];
     }
 
     public function getVs()

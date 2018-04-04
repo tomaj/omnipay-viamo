@@ -6,11 +6,9 @@ use Omnipay\Common\Message\AbstractResponse;
 
 class CompletePurchaseResponse extends AbstractResponse
 {
-    const SUCCESS = 'OK';
-
     public function isSuccessful()
     {
-        return static::SUCCESS === $this->getRes();
+        return $this->getRes() == 'OK';
     }
 
     public function getRes()

@@ -15,7 +15,8 @@ class Gateway extends AbstractGateway
     {
         return [
             'bid' => '',
-            'key' => ''
+            'key1' => '',
+            'key2' => '',
         ];
     }
 
@@ -29,14 +30,24 @@ class Gateway extends AbstractGateway
         return $this->setParameter('bid', $value);
     }
 
-    public function getKey()
+    public function getKey1()
     {
-        return $this->getParameter('key');
+        return $this->getParameter('key1');
     }
 
-    public function setKey($value)
+    public function setKey1($value)
     {
-        return $this->setParameter('key', $value);
+        return $this->setParameter('key1', $value);
+    }
+
+    public function getKey2()
+    {
+        return $this->getParameter('key2');
+    }
+
+    public function setKey2($value)
+    {
+        return $this->setParameter('key2', $value);
     }
 
     public function purchase(array $parameters = array())
@@ -47,5 +58,10 @@ class Gateway extends AbstractGateway
     public function completePurchase(array $parameters = array())
     {
         return $this->createRequest(\Omnipay\Viamo\Message\CompletePurchaseRequest::class, $parameters);
+    }
+
+    public function webhook(array $json = array())
+    {
+        return $this->createRequest(\Omnipay\Viamo\Message\WebhookRequest::class, $json);
     }
 }
