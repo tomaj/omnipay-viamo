@@ -24,6 +24,8 @@
         }
     },
     "require": {
+        "ext-openssl": "*",
+        "ext-hash": "*",
         "omnipay/common": "~2.0"
     },
     "require-dev": {
