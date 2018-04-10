@@ -5,16 +5,17 @@ namespace Omnipay\Viamo\Message;
 use Omnipay\Common\Currency;
 use Omnipay\Common\Exception\InvalidRequestException;
 use Omnipay\Common\Message\AbstractRequest;
+use Omnipay\Viamo\Core\ViamoSign;
 
 class CompletePurchaseRequest extends AbstractRequest
 {
     public function getData()
     {
-        $requestString = $_GET['requestString'];
-        $pos = strpos($requestString, '*SIG:');
-        $input = substr($requestString, 0, $pos);
+        $responseString = $_GET['responseString'];
+        $pos = strpos($responseString, '*SIG:');
+        $input = substr($responseString, 0, $pos);
 
-        $parts = explode('*', $requestString);
+        $parts = explode('*', $responseString);
         $inputData = [];
         foreach ($parts as $pairs) {
             list($key, $value) = explode(':', $pairs);
@@ -29,10 +30,9 @@ class CompletePurchaseRequest extends AbstractRequest
             ];
         }
 
-        $k1 = $this->getKey1();
-        $sign = openssl_encrypt($input, 'aes-128-ecb', hex2bin($k1), OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING);
+        $viamoSign = new ViamoSign();
 
-        if ($sign != $inputData['SIG']) {
+        if ($viamoSign->sign($input, $this->getKey1()) != strtoupper($inputData['SIG'])) {
             return [
                 'RES' => 'ERROR',
                 'vs' => $inputData['VS'],

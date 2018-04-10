@@ -4,6 +4,7 @@ namespace Omnipay\Viamo\Message;
 
 use Omnipay\Common\Currency;
 use Omnipay\Common\Message\AbstractRequest;
+use Omnipay\Viamo\Core\ViamoSign;
 
 class PurchaseRequest extends AbstractRequest
 {
@@ -103,6 +104,16 @@ class PurchaseRequest extends AbstractRequest
         return $this->getParameter('dt');
     }
 
+    public function getTestMode()
+    {
+        return $this->getParameter('testMode');
+    }
+
+    public function setTestMode($value)
+    {
+        return $this->setParameter('testMode', $value);
+    }
+
     public function getData()
     {
         $this->validate('bid', 'key1', 'key2');
@@ -131,27 +142,42 @@ class PurchaseRequest extends AbstractRequest
         if ($this->getMsg()) {
             $params['MSG'] = $this->getMsg();
         }
-//        if ($this->getRurl()) {
-//            $params['RURL'] = urlencode($this->getRurl());
-//        }
-        
-        $paramsStrings = [];
-        foreach ($params as $key => $value) {
-            $paramsStrings[] = "{$key}:{$value}";
-        }
-        $requestString =  implode('*', $paramsStrings);
 
-        $hash = substr(hash('sha256', $requestString), 0, 16);
-        $k1 = $this->getKey1();
-        $sign = openssl_encrypt($hash, 'aes-128-ecb', hex2bin($k1), OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING);
-        $requestString .= '*SIG:' . strtoupper(bin2hex($sign));
+        $requestString = $this->prepareRequestString($params);
 
         $data['vs'] = $this->getVs();
         $data['template'] = 300;
         $data['qr'] = $this->getQrEndpoint() . '?text=' . $requestString. '&template=' . $data['template'];
-        $data['app_link'] = 'viamo://?requestString=' . urlencode($requestString);
+
+        if ($this->getRurl()) {
+            $params['RURL'] = str_replace('*', '%2A', $this->getRurl());
+        }
+
+        $appRequestString = $this->prepareRequestString($params);
+
+        $app = 'viamo';
+        if ($this->getTestMode()) {
+            $app = 'viamo-staging';
+        }
+        $data['app_link'] = $app . '://?requestString=' . $appRequestString;
 
         return $this->response = new PurchaseResponse($this, $data);
+    }
+
+    private function prepareRequestString($params)
+    {
+        $paramsStrings = [];
+        foreach ($params as $key => $value) {
+            $paramsStrings[] = "{$key}:{$value}";
+        }
+
+        $requestString = implode('*', $paramsStrings);
+
+        $sign = new ViamoSign();
+
+        $requestString .= '*SIG:' . $sign->sign($requestString, $this->getKey1());
+
+        return $requestString;
     }
 
     public function getQrEndpoint()

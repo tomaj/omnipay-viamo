@@ -4,6 +4,7 @@ namespace Omnipay\Viamo\Message;
 
 use Omnipay\Common\Currency;
 use Omnipay\Common\Message\AbstractRequest;
+use Omnipay\Viamo\Core\ViamoSign;
 
 class WebhookRequest extends AbstractRequest
 {
@@ -61,7 +62,6 @@ class WebhookRequest extends AbstractRequest
 
     public function sendData($data)
     {
-        $k2 = $this->getKey2();
         $json = $this->getParameter('json');
 
         if (isset($json['payment'])) {
@@ -76,7 +76,7 @@ class WebhookRequest extends AbstractRequest
             return $this->response = new WebhookResponse($this, ['success' => false, 'error' => 'Missing signature']);
         }
 
-        $textToSign = "";
+        $textToSign = '';
         if (!empty($payment['rid'])) {
             $textToSign .= $payment['rid'];
         }
@@ -90,12 +90,9 @@ class WebhookRequest extends AbstractRequest
         $textToSign .= $payment['amount'];
         $textToSign .= $payment['id'];
 
-        $hash = hash('sha256', $textToSign, true);
-        $trimmedHash = substr($hash, 0, 16);
+        $viamoSign = new ViamoSign();
 
-        $signed = openssl_encrypt($trimmedHash, 'aes-128-ecb', hex2bin($k2), OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING);
-
-        if (strtoupper(bin2hex($signed)) === strtoupper($json['signature']['sign'])) {
+        if ($viamoSign->sign($textToSign, $this->getKey2()) === strtoupper($json['signature']['sign'])) {
             return $this->response = new WebhookResponse($this, ['success' => true, 'vs' => $payment['vs']]);
         }
 

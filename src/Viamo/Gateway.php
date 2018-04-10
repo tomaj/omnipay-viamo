@@ -49,7 +49,7 @@ class Gateway extends AbstractGateway
     {
         return $this->setParameter('key2', $value);
     }
-
+    
     public function purchase(array $parameters = array())
     {
         return $this->createRequest(\Omnipay\Viamo\Message\PurchaseRequest::class, $parameters);
