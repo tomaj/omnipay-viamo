@@ -98,5 +98,4 @@ class WebhookRequest extends AbstractRequest
 
         return $this->response = new WebhookResponse($this, ['success' => false, 'error' => 'Wrong signature', 'vs' => $payment['vs']]);
     }
-
 }
