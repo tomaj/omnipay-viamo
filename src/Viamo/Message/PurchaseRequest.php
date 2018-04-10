@@ -147,7 +147,10 @@ class PurchaseRequest extends AbstractRequest
 
         $data['vs'] = $this->getVs();
         $data['template'] = 300;
-        $data['qr'] = $this->getQrEndpoint() . '?text=' . $requestString. '&template=' . $data['template'];
+        $data['qr_url'] = $this->getQrEndpoint() . '?text=' . $requestString. '&template=' . $data['template'];
+        $qrCode = new QrCode($requestString);
+        $qrCode->setSize(300);
+        $data['qr_data'] = base64_encode($qrCode->writeString());
 
         if ($this->getRurl()) {
             $params['RURL'] = str_replace('*', '%2A', $this->getRurl());
