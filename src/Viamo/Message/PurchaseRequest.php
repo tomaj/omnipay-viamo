@@ -5,6 +5,7 @@ namespace Omnipay\Viamo\Message;
 use Omnipay\Common\Currency;
 use Omnipay\Common\Message\AbstractRequest;
 use Omnipay\Viamo\Core\ViamoSign;
+use Endroid\QrCode\QrCode;
 
 class PurchaseRequest extends AbstractRequest
 {
