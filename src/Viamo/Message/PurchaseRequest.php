@@ -113,32 +113,33 @@ class PurchaseRequest extends AbstractRequest
     {
         $params = [];
 
+        $params['QP'] = '1.0';
         $params['BID'] = $this->getBid();
         $params['AM'] = $this->getAmount();
+        if ($this->getCurrency()) {
+            $params['CC'] = $this->getCurrency();
+        }
         if ($this->getVs()) {
             $params['VS'] = $this->getVs();
         }
-        if ($this->getCurrency()) {
-            $params['CC'] = $this->getCurrency();
+        if ($this->getCs()) {
+            $params['CS'] = $this->getCs();
         }
         if ($this->getSs()) {
             $params['SS'] = $this->getSs();
         }
-        if ($this->getCs()) {
-            $params['SS'] = $this->getCs();
-        }
-        if ($this->getRurl()) {
-            $params['RURL'] = $this->getRurl();
-        }
         if ($this->getMsg()) {
             $params['MSG'] = $this->getMsg();
         }
-
+//        if ($this->getRurl()) {
+//            $params['RURL'] = urlencode($this->getRurl());
+//        }
+        
         $paramsStrings = [];
         foreach ($params as $key => $value) {
             $paramsStrings[] = "{$key}:{$value}";
         }
-        $requestString = "QP:1.0*" . implode('*', $paramsStrings);
+        $requestString =  implode('*', $paramsStrings);
 
         $hash = substr(hash('sha256', $requestString), 0, 16);
         $k1 = $this->getKey1();
