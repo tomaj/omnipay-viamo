@@ -150,6 +150,9 @@ class PurchaseRequest extends AbstractRequest
         if ($this->getSs()) {
             $params['SS'] = $this->getSs();
         }
+        if ($this->getRpt()) {
+            $params['RPT'] = intval($this->getRpt());
+        }
         if ($this->getMsg()) {
             $params['MSG'] = $this->getMsg();
         }
@@ -172,9 +175,6 @@ class PurchaseRequest extends AbstractRequest
         $app = 'viamo';
         if ($this->getTestMode()) {
             $app = 'viamo-staging';
-        }
-        if ($this->getRpt()) {
-            $params['RPT'] = intval($this->getRpt());
         }
         if ($this->getMsg()) {
             $params['MSG'] = $this->getMsg();
