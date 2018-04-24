@@ -115,6 +115,16 @@ class PurchaseRequest extends AbstractRequest
         return $this->setParameter('testMode', $value);
     }
 
+    public function setRpt($value)
+    {
+        return $this->setParameter('rpt', $value);
+    }
+
+    public function getRpt()
+    {
+        return $this->getParameter('rpt');
+    }
+
     public function getData()
     {
         $this->validate('bid', 'key1', 'key2');
@@ -162,6 +172,12 @@ class PurchaseRequest extends AbstractRequest
         $app = 'viamo';
         if ($this->getTestMode()) {
             $app = 'viamo-staging';
+        }
+        if ($this->getRpt()) {
+            $params['RPT'] = intval($this->getRpt());
+        }
+        if ($this->getMsg()) {
+            $params['MSG'] = $this->getMsg();
         }
         $data['app_link'] = $app . '://?requestString=' . $appRequestString;
 
