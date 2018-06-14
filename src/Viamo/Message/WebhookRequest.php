@@ -92,10 +92,13 @@ class WebhookRequest extends AbstractRequest
 
         $viamoSign = new ViamoSign();
 
-        if ($viamoSign->sign($textToSign, $this->getKey2()) === strtoupper($json['signature']['sign'])) {
-            return $this->response = new WebhookResponse($this, ['success' => true, 'vs' => $payment['vs']]);
+        if ($viamoSign->sign($textToSign, $this->getKey2()) !== strtoupper($json['signature']['sign'])) {
+            return $this->response = new WebhookResponse($this, ['success' => false, 'error' => 'Wrong signature', 'vs' => $payment['vs']]);
+        }
+        if ($payment['result'] != 'OK') {
+            return $this->response = new WebhookResponse($this, ['success' => false, 'error' => 'Invalid result', 'vs' => $payment['vs']]);
         }
 
-        return $this->response = new WebhookResponse($this, ['success' => false, 'error' => 'Wrong signature', 'vs' => $payment['vs']]);
+        return $this->response = new WebhookResponse($this, ['success' => true, 'vs' => $payment['vs']]);
     }
 }
