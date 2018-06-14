@@ -29,4 +29,20 @@ class WebhookResponse extends AbstractResponse
         }
         return false;
     }
+
+    public function getPaymentId()
+    {
+        if (isset($this->data['payment_id'])) {
+            return $this->data['payment_id'];
+        }
+        return false;
+    }
+
+    public function getNotificationId()
+    {
+        if (isset($this->data['notification_id'])) {
+            return $this->data['notification_id'];
+        }
+        return false;
+    }
 }
