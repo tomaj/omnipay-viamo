@@ -101,6 +101,6 @@ class WebhookRequest extends AbstractRequest
             return $this->response = new WebhookResponse($this, ['success' => false, 'error' => 'Invalid result', 'vs' => $payment['vs'], 'payment_id' => $payment['id'], 'notification_id' => $notificationId]);
         }
 
-        return $this->response = new WebhookResponse($this, ['success' => true, 'vs' => $payment['vs'], 'notification_id' => $notificationId]);
+        return $this->response = new WebhookResponse($this, ['success' => true, 'vs' => $payment['vs'], 'notification_id' => $notificationId, 'payment_id' => $payment['id']]);
     }
 }
