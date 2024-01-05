@@ -2,7 +2,7 @@
 
 namespace Omnipay\Viamo\Message;
 
-use Omnipay\Common\Currency;
+use Endroid\QrCode\Writer\PngWriter;
 use Omnipay\Common\Message\AbstractRequest;
 use Omnipay\Viamo\Core\ViamoSign;
 use Endroid\QrCode\QrCode;
@@ -164,7 +164,9 @@ class PurchaseRequest extends AbstractRequest
         $data['qr_url'] = $this->getQrEndpoint() . '?text=' . $requestString. '&template=' . $data['template'];
         $qrCode = new QrCode($requestString);
         $qrCode->setSize(300);
-        $data['qr_data'] = base64_encode($qrCode->writeString());
+
+        $writer = new PngWriter();
+        $data['qr_data'] = base64_encode($writer->write($qrCode)->getString());
 
         if ($this->getRurl()) {
             $params['RURL'] = str_replace('*', '%2A', $this->getRurl());
