@@ -28,12 +28,10 @@
         "ext-openssl": "*",
         "ext-hash": "*",
         "omnipay/common": "~3.0",
-        "endroid/qr-code": "^5.0",
-        "symfony/http-client": "^7.0"
+        "endroid/qr-code": "^5.0"
     },
     "require-dev": {
-        "omnipay/tests": "~4.0",
-        "http-interop/http-factory-guzzle": "^1.2"
+        "omnipay/tests": "~4.0"
     },
     "scripts": {
         "test": "phpunit"
