@@ -19,6 +19,6 @@ class GatewayTest extends GatewayTestCase
 
     public function testPurchase()
     {
-        
+        $this->markTestIncomplete('Not implemented yet.');
     }
 }

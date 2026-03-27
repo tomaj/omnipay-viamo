@@ -162,8 +162,7 @@ class PurchaseRequest extends AbstractRequest
         $data['vs'] = $this->getVs();
         $data['template'] = 300;
         $data['qr_url'] = $this->getQrEndpoint() . '?text=' . $requestString. '&template=' . $data['template'];
-        $qrCode = new QrCode($requestString);
-        $qrCode->setSize(300);
+        $qrCode = new QrCode(data: $requestString, size: 300);
 
         $writer = new PngWriter();
         $data['qr_data'] = base64_encode($writer->write($qrCode)->getString());
