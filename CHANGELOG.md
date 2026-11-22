@@ -24,6 +24,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 ### Fixed
 
 * `CompletePurchaseResponse::getVs()` returns the variable symbol; it always returned `null` because the request stored it under `vs`. **BREAKING CHANGE**: `getData()` now has it under `VS`; read it with `getVs()` ([#20](https://github.com/tomaj/omnipay-viamo/issues/20)).
+* `completePurchase()` no longer emits PHP warnings for a missing or malformed `responseString`: a missing string, a string without `*SIG:`, without `BID`, `RES` or `VS` gives a failed response (`getRes() === 'ERROR'`) with the reason in `getMessage()`. The signature is split at the last `*SIG:`, and a field value may contain `:` ([#21](https://github.com/tomaj/omnipay-viamo/issues/21)).
 
 ### Security
 
