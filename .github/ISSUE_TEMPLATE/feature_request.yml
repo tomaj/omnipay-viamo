@@ -1,0 +1,69 @@
+name: Feature request
+description: Suggest an improvement to omnipay-viamo
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion. omnipay-viamo is an Omnipay gateway for Viamo mobile payments.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is difficult or missing today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: How should the gateway behave?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives
+      description: What else did you consider, including doing this outside the library?
+    validations:
+      required: false
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Example usage
+      description: Show how calling code would use the change.
+      render: php
+    validations:
+      required: false
+
+  - type: dropdown
+    id: compatibility
+    attributes:
+      label: Compatibility
+      description: Can this land without a breaking change?
+      options:
+        - Yes, it can ship in a minor version
+        - No, it needs the next major version
+        - Not sure
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and this is not a duplicate
+          required: true
