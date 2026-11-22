@@ -21,6 +21,10 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 * **BREAKING CHANGE**: `completePurchase()` reads `responseString` from the gateway's HTTP request (`Request::createFromGlobals()` by default) instead of `$_GET` ([#16](https://github.com/tomaj/omnipay-viamo/issues/16)).
 * `completePurchase()` compares the returned `BID` strictly (`!==`) instead of `!=`, so numeric-looking values no longer match loosely.
 
+### Fixed
+
+* `CompletePurchaseResponse::getVs()` returns the variable symbol; it always returned `null` because the request stored it under `vs`. **BREAKING CHANGE**: `getData()` now has it under `VS`; read it with `getVs()` ([#20](https://github.com/tomaj/omnipay-viamo/issues/20)).
+
 ### Security
 
 * **Security**: The return URL and webhook signatures are compared with `hash_equals()` in constant time instead of `!=`/`!==`; a non-string webhook signature is rejected ([#16](https://github.com/tomaj/omnipay-viamo/issues/16)).

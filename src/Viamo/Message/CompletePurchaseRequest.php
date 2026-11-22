@@ -36,7 +36,7 @@ final class CompletePurchaseRequest extends AbstractRequest
         if ((string) $this->getBid() !== $inputData['BID']) {
             return [
                 'RES' => 'ERROR',
-                'vs' => $inputData['VS'],
+                'VS' => $inputData['VS'],
                 'message' => 'Wrong BID',
             ];
         }
@@ -44,14 +44,14 @@ final class CompletePurchaseRequest extends AbstractRequest
         if (!new ViamoSign()->verify($input, (string) $this->getKey1(), $inputData['SIG'])) {
             return [
                 'RES' => 'ERROR',
-                'vs' => $inputData['VS'],
+                'VS' => $inputData['VS'],
                 'message' => 'Wrong sign',
             ];
         }
 
         return [
             'RES' => $inputData['RES'],
-            'vs' => $inputData['VS'],
+            'VS' => $inputData['VS'],
         ];
     }
 
