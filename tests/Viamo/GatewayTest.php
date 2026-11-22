@@ -2,23 +2,27 @@
 
 namespace Omnipay\Viamo;
 
+use Omnipay\Common\Http\ClientInterface;
 use Omnipay\Tests\GatewayTestCase;
+use Symfony\Component\HttpFoundation\Request;
 
 class GatewayTest extends GatewayTestCase
 {
-	/**
-     * @var Gateway
-     */
-    protected $gateway;
-
     public function setUp(): void
     {
         parent::setUp();
-        $this->gateway = new Gateway($this->getHttpClient(), $this->getHttpRequest());
+
+        $httpClient = $this->getHttpClient();
+        $httpRequest = $this->getHttpRequest();
+        if (!$httpClient instanceof ClientInterface || !$httpRequest instanceof Request) {
+            throw new \LogicException('Unexpected HTTP client or request from GatewayTestCase.');
+        }
+
+        $this->gateway = new Gateway($httpClient, $httpRequest);
     }
 
-    public function testPurchase()
+    public function testPurchase(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        self::markTestIncomplete('Not implemented yet.');
     }
 }

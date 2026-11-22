@@ -19,27 +19,52 @@
         }
     ],
     "autoload": {
-        "psr-4": { 
+        "psr-4": {
             "Omnipay\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Omnipay\\": "tests/"
         }
     },
     "require": {
         "php": "^8.3",
-        "ext-openssl": "*",
         "ext-hash": "*",
-        "omnipay/common": "~3.0",
+        "ext-openssl": "*",
         "endroid/qr-code": "^6.0",
+        "omnipay/common": "^3.3",
         "symfony/http-client": "^7.4"
     },
     "require-dev": {
-        "omnipay/tests": "~4.0"
+        "friendsofphp/php-cs-fixer": "^3.95",
+        "guzzlehttp/psr7": "^2.12.3",
+        "omnipay/tests": "^4.2",
+        "phpstan/phpstan": "^2.3",
+        "phpstan/phpstan-deprecation-rules": "^2.0",
+        "phpstan/phpstan-phpunit": "^2.0.5",
+        "phpstan/phpstan-strict-rules": "^2.0",
+        "phpunit/phpunit": "^11.5"
     },
     "scripts": {
-        "test": "phpunit"
+        "check": [
+            "@phpcs",
+            "@phpstan",
+            "@test"
+        ],
+        "cs-fix": "php-cs-fixer fix",
+        "phpcs": "php-cs-fixer fix --dry-run --diff --verbose",
+        "phpstan": "phpstan analyse --memory-limit=1G",
+        "phpunit": [
+            "@putenv XDEBUG_MODE=off",
+            "phpunit --no-coverage"
+        ],
+        "test": "@phpunit"
     },
     "config": {
         "allow-plugins": {
             "php-http/discovery": true
-        }
+        },
+        "sort-packages": true
     }
 }

@@ -3,46 +3,62 @@
 namespace Omnipay\Viamo\Message;
 
 use Omnipay\Common\Message\AbstractResponse;
-use Omnipay\Common\Message\RedirectResponseInterface;
 
 class WebhookResponse extends AbstractResponse
 {
+    /**
+     * @return bool
+     */
     public function isSuccessful()
     {
-        return $this->data['success'];
+        return $this->getValue('success') === true;
     }
 
+    /**
+     * @return bool
+     */
     public function isRedirect()
     {
         return false;
     }
 
+    /**
+     * @return mixed
+     */
     public function errorMessage()
     {
-        return $this->data['error'];
+        return $this->getValue('error');
     }
 
+    /**
+     * @return mixed
+     */
     public function getVs()
     {
-        if (isset($this->data['vs'])) {
-            return $this->data['vs'];
-        }
-        return false;
+        return $this->getValue('vs') ?? false;
     }
 
+    /**
+     * @return mixed
+     */
     public function getPaymentId()
     {
-        if (isset($this->data['payment_id'])) {
-            return $this->data['payment_id'];
-        }
-        return false;
+        return $this->getValue('payment_id') ?? false;
     }
 
+    /**
+     * @return mixed
+     */
     public function getNotificationId()
     {
-        if (isset($this->data['notification_id'])) {
-            return $this->data['notification_id'];
+        return $this->getValue('notification_id') ?? false;
+    }
+
+    private function getValue(string $key): mixed
+    {
+        if (is_array($this->data) && isset($this->data[$key])) {
+            return $this->data[$key];
         }
-        return false;
+        return null;
     }
 }
