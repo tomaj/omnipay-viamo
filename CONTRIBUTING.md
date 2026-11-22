@@ -10,7 +10,7 @@ Security vulnerabilities are reported in private. See [SECURITY.md](SECURITY.md)
 
 - Follow [PER Coding Style](https://www.php-fig.org/per/coding-style/). `composer phpcs` checks `src` and `tests`.
 - Add tests for every behaviour change. A patch without tests will not be accepted.
-- A change near signing or signature verification must keep the expected signatures computed independently with the `openssl` CLI (see `tests/Viamo/Core/ViamoSignTest.php`). Signatures are compared with `hash_equals()`.
+- A change near signing or signature verification must keep the expected signatures computed independently with the `openssl` CLI (see `tests/Core/ViamoSignTest.php`). Signatures are compared with `hash_equals()`.
 - Document behaviour changes in `docs/`, `README.md` and `CHANGELOG.md`.
 - Follow [Semantic Versioning](https://semver.org/). The current development line is 5.x. Breaking changes wait for the next major version.
 - Open one pull request per change, from a feature branch. Do not ask us to pull from your `master` branch.
@@ -41,7 +41,7 @@ composer coverage
 composer infection
 ```
 
-The documentation site lives in `docs/` (VitePress, Node.js 22):
+The documentation site lives in `docs/` (VitePress, Node.js 22). PHP examples are files in `docs/snippets/`, imported into the pages with `<<< @/snippets/<file>.php`; `tests/DocsSnippetsTest.php` runs every one of them, and PHPStan and PHP-CS-Fixer check them like the code.
 
 ```bash
 cd docs

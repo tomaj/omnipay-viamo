@@ -7,6 +7,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 ### Added
 
 * GitHub Actions CI: tests on PHP 8.4 - 8.6 (plus `--prefer-lowest`) and a nightly PHP 8.7 job that may fail, PHP-CS-Fixer (PER-CS), PHPStan level max with strict rules, Rector, `composer audit`, 90% statement coverage and Infection mutation testing, Dependabot, CodeQL, OpenSSF Scorecard, and a tag-driven release workflow ([#13](https://github.com/tomaj/omnipay-viamo/issues/13), [#14](https://github.com/tomaj/omnipay-viamo/issues/14)).
+* Documentation site at https://tomaj.github.io/omnipay-viamo/ with every operation, parameter, test mode and the signature algorithm; its PHP examples run in the test suite ([#18](https://github.com/tomaj/omnipay-viamo/issues/18)).
 * A real test suite: signatures checked against `openssl` CLI values, every operation with valid, tampered and malformed input; 100% statement coverage and mutation testing ([#17](https://github.com/tomaj/omnipay-viamo/issues/17)).
 * `LICENSE.md` (MIT), `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` and a `.gitattributes` that keeps tests and tooling out of the Composer archive ([#12](https://github.com/tomaj/omnipay-viamo/issues/12)).
 * `PurchaseResponse` has `getQrData()`, `getQrUrl()` and `getAppLink()`; `CompletePurchaseResponse::getMessage()` and `WebhookResponse::getMessage()` return the rejection reason; `send()` of each request is typed with its concrete response class ([#16](https://github.com/tomaj/omnipay-viamo/issues/16)).
