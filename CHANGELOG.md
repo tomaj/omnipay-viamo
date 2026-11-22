@@ -1,0 +1,71 @@
+# Change Log
+All notable changes to this project will be documented in this file.
+Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
+
+## [Unreleased][unreleased]
+
+### Added
+
+* GitHub Actions CI: tests on PHP 8.3 - 8.6 (plus `--prefer-lowest`) and a nightly PHP 8.7 job that may fail, PHP-CS-Fixer (PER-CS), PHPStan level max with strict rules, `composer audit`, Dependabot.
+
+### Changed
+
+* Requires `omnipay/common` ^3.3 (was ~3.0) and PHPUnit 11 for development.
+* `completePurchase()` compares the returned `BID` and `SIG` strictly (`!==`) instead of `!=`, so numeric-looking values no longer match loosely.
+* Non-string request and query values no longer emit PHP warnings or `TypeError`s while signing; they are treated as empty strings.
+
+## [4.0.0] - 2026-03-27
+
+### Changed
+
+* **BREAKING CHANGE**: Requires PHP 8.3 or newer (was 8.1) ([#11](https://github.com/tomaj/omnipay-viamo/pull/11)).
+* **BREAKING CHANGE**: Requires `endroid/qr-code` 6 (was 5). If your application uses `endroid/qr-code` directly, upgrade it to 6 as well ([#11](https://github.com/tomaj/omnipay-viamo/pull/11)).
+* Requires `symfony/http-client` ^7.4 as the HTTP client for Omnipay ([#11](https://github.com/tomaj/omnipay-viamo/pull/11)).
+
+## [3.1.1] - 2024-01-05
+
+### Fixed
+
+* Installation on PHP 8.1: the `symfony/http-client` ^7.0 requirement added in 3.1.0 needs PHP 8.2, so it is removed again, and `composer.lock` is no longer committed ([#10](https://github.com/tomaj/omnipay-viamo/pull/10)).
+
+## [3.1.0] - 2024-01-05
+
+### Changed
+
+* **BREAKING CHANGE**: Requires PHP 8.1 or newer and `endroid/qr-code` 5 (was 3). The QR code is rendered with endroid's `PngWriter`; the `qr_data` (base64 PNG) in the purchase response is unchanged ([#9](https://github.com/tomaj/omnipay-viamo/pull/9)).
+* Requires `symfony/http-client` ^7.0 ([#9](https://github.com/tomaj/omnipay-viamo/pull/9)).
+
+## [3.0.1] - 2020-11-03
+
+### Changed
+
+* Development dependency update (`symfony/http-foundation` 4.4.16); no change in the library code ([#3](https://github.com/tomaj/omnipay-viamo/pull/3)).
+
+## [3.0.0] - 2019-02-20
+
+### Changed
+
+* **BREAKING CHANGE**: Requires `omnipay/common` 3 (was 2). Follow the Omnipay 3 upgrade guide (HTTP client, `Omnipay\Common\Http\ClientInterface`).
+
+## [1.0.1] - 2018-08-13
+
+### Added
+
+* The webhook response for a successful payment includes the Viamo `payment_id`.
+
+## [1.0.0] - 2018-06-14
+
+Initial release. Omnipay 2 gateway for Viamo mobile payments (Slovakia):
+
+* `purchase()` builds the signed Viamo payment request (`BID`, amount, currency, `VS`/`CS`/`SS`, `RPT`, `MSG`, return URL) and returns a QR code (`qr_data` as a base64 PNG, `qr_url` for Viamo's QR API) and an app link (`viamo://`, `viamo-staging://` in test mode).
+* `completePurchase()` verifies the `responseString` returned to the return URL (BID and AES signature with `key1`).
+* `webhook()` verifies Viamo's payment notification (signed with `key2`) and returns the variable symbol and notification id.
+
+[unreleased]: https://github.com/tomaj/omnipay-viamo/compare/4.0.0...HEAD
+[4.0.0]: https://github.com/tomaj/omnipay-viamo/compare/3.1.1...4.0.0
+[3.1.1]: https://github.com/tomaj/omnipay-viamo/compare/3.1.0...3.1.1
+[3.1.0]: https://github.com/tomaj/omnipay-viamo/compare/3.0.1...3.1.0
+[3.0.1]: https://github.com/tomaj/omnipay-viamo/compare/3.0.0...3.0.1
+[3.0.0]: https://github.com/tomaj/omnipay-viamo/compare/1.0.1...3.0.0
+[1.0.1]: https://github.com/tomaj/omnipay-viamo/compare/1.0.0...1.0.1
+[1.0.0]: https://github.com/tomaj/omnipay-viamo/releases/tag/1.0.0
