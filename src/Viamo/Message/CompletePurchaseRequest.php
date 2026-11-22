@@ -1,19 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Omnipay\Viamo\Message;
 
 use Omnipay\Common\Message\AbstractRequest;
+use Omnipay\Viamo\Core\CredentialsParameters;
 use Omnipay\Viamo\Core\Str;
 use Omnipay\Viamo\Core\ViamoSign;
 
-class CompletePurchaseRequest extends AbstractRequest
+/**
+ * Verifies the `responseString` query parameter that Viamo appends to the return URL.
+ */
+final class CompletePurchaseRequest extends AbstractRequest
 {
+    use CredentialsParameters;
+
     /**
      * @return array<string, string>
      */
-    public function getData()
+    #[\Override]
+    public function getData(): array
     {
-        $responseString = Str::from($_GET['responseString']);
+        $responseString = Str::from($this->httpRequest->query->all()['responseString'] ?? null);
         $pos = strpos($responseString, '*SIG:');
         $input = substr($responseString, 0, (int) $pos);
 
@@ -24,7 +33,7 @@ class CompletePurchaseRequest extends AbstractRequest
             $inputData[$key] = $value;
         }
 
-        if (Str::from($this->getBid()) !== $inputData['BID']) {
+        if ((string) $this->getBid() !== $inputData['BID']) {
             return [
                 'RES' => 'ERROR',
                 'vs' => $inputData['VS'],
@@ -32,9 +41,7 @@ class CompletePurchaseRequest extends AbstractRequest
             ];
         }
 
-        $viamoSign = new ViamoSign();
-
-        if ($viamoSign->sign($input, $this->getKey1()) !== strtoupper($inputData['SIG'])) {
+        if (!new ViamoSign()->verify($input, (string) $this->getKey1(), $inputData['SIG'])) {
             return [
                 'RES' => 'ERROR',
                 'vs' => $inputData['VS'],
@@ -48,63 +55,9 @@ class CompletePurchaseRequest extends AbstractRequest
         ];
     }
 
-    /**
-     * @param mixed $data
-     * @return CompletePurchaseResponse
-     */
-    public function sendData($data)
+    #[\Override]
+    public function sendData(mixed $data): CompletePurchaseResponse
     {
         return $this->response = new CompletePurchaseResponse($this, $data);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getBid()
-    {
-        return $this->getParameter('bid');
-    }
-
-    /**
-     * @param mixed $value
-     * @return $this
-     */
-    public function setBid($value)
-    {
-        return $this->setParameter('bid', $value);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getKey1()
-    {
-        return $this->getParameter('key1');
-    }
-
-    /**
-     * @param mixed $value
-     * @return $this
-     */
-    public function setKey1($value)
-    {
-        return $this->setParameter('key1', $value);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getKey2()
-    {
-        return $this->getParameter('key2');
-    }
-
-    /**
-     * @param mixed $value
-     * @return $this
-     */
-    public function setKey2($value)
-    {
-        return $this->setParameter('key2', $value);
     }
 }

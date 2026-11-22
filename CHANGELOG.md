@@ -8,13 +8,22 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 * GitHub Actions CI: tests on PHP 8.4 - 8.6 (plus `--prefer-lowest`) and a nightly PHP 8.7 job that may fail, PHP-CS-Fixer (PER-CS), PHPStan level max with strict rules, Rector, `composer audit`, 90% statement coverage and Infection mutation testing, Dependabot, CodeQL, OpenSSF Scorecard, and a tag-driven release workflow ([#13](https://github.com/tomaj/omnipay-viamo/issues/13), [#14](https://github.com/tomaj/omnipay-viamo/issues/14)).
 * `LICENSE.md` (MIT), `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` and a `.gitattributes` that keeps tests and tooling out of the Composer archive ([#12](https://github.com/tomaj/omnipay-viamo/issues/12)).
+* `PurchaseResponse` has `getQrData()`, `getQrUrl()` and `getAppLink()`; `CompletePurchaseResponse::getMessage()` and `WebhookResponse::getMessage()` return the rejection reason ([#16](https://github.com/tomaj/omnipay-viamo/issues/16)).
 
 ### Changed
 
 * **BREAKING CHANGE**: Requires PHP 8.4 or newer (was 8.3) ([#15](https://github.com/tomaj/omnipay-viamo/issues/15)).
 * Requires `ext-gd` (the QR code is rendered as PNG with GD, which 4.x used without declaring it), `psr/http-client` and `nyholm/psr7`, so Omnipay's default HTTP client works without the `php-http/discovery` Composer plugin installing them. `symfony/http-client` 8 is allowed ([#12](https://github.com/tomaj/omnipay-viamo/issues/12)).
 * Requires `omnipay/common` ^3.3 (was ~3.0) and PHPUnit 13 for development; `omnipay/tests` is no longer used.
+* **BREAKING CHANGE**: Native parameter and return types on every method; the gateway, requests, responses and `ViamoSign` are `final`. Setters accept `?string` (`setRpt()`: `int|string|null`), getters return `?string`. See [UPGRADE-5.0.md](UPGRADE-5.0.md) ([#16](https://github.com/tomaj/omnipay-viamo/issues/16)).
+* **BREAKING CHANGE**: `PurchaseResponse::getVs()`, `WebhookResponse::getVs()`, `getPaymentId()` and `getNotificationId()` return `null` instead of `false` for a missing value, and return strings ([#16](https://github.com/tomaj/omnipay-viamo/issues/16)).
+* **BREAKING CHANGE**: An invalid `key1`/`key2` (not 32 hexadecimal characters) throws `Omnipay\Viamo\Exception\InvalidKeyException` instead of signing with a zero-padded or truncated key. All package exceptions implement `Omnipay\Viamo\Exception\ViamoException` ([#16](https://github.com/tomaj/omnipay-viamo/issues/16)).
+* **BREAKING CHANGE**: `completePurchase()` reads `responseString` from the gateway's HTTP request (`Request::createFromGlobals()` by default) instead of `$_GET` ([#16](https://github.com/tomaj/omnipay-viamo/issues/16)).
 * `completePurchase()` compares the returned `BID` strictly (`!==`) instead of `!=`, so numeric-looking values no longer match loosely.
+
+### Security
+
+* **Security**: The return URL and webhook signatures are compared with `hash_equals()` in constant time instead of `!=`/`!==`; a non-string webhook signature is rejected ([#16](https://github.com/tomaj/omnipay-viamo/issues/16)).
 
 ## [4.0.0] - 2026-03-27
 

@@ -1,110 +1,80 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Omnipay\Viamo;
 
 use Omnipay\Common\AbstractGateway;
-use Omnipay\Common\Message\AbstractRequest;
+use Omnipay\Viamo\Core\CredentialsParameters;
 use Omnipay\Viamo\Message\CompletePurchaseRequest;
 use Omnipay\Viamo\Message\PurchaseRequest;
 use Omnipay\Viamo\Message\WebhookRequest;
 
-class Gateway extends AbstractGateway
+/**
+ * Viamo mobile payments gateway.
+ */
+final class Gateway extends AbstractGateway
 {
-    /**
-     * @return string
-     */
-    public function getName()
+    use CredentialsParameters;
+
+    #[\Override]
+    public function getName(): string
     {
         return 'Viamo Gateway';
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array{bid: string, key1: string, key2: string, testMode: bool}
      */
-    public function getDefaultParameters()
+    #[\Override]
+    public function getDefaultParameters(): array
     {
         return [
             'bid' => '',
             'key1' => '',
             'key2' => '',
+            'testMode' => false,
         ];
     }
 
     /**
-     * @return mixed
-     */
-    public function getBid()
-    {
-        return $this->getParameter('bid');
-    }
-
-    /**
-     * @param mixed $value
-     * @return $this
-     */
-    public function setBid($value)
-    {
-        return $this->setParameter('bid', $value);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getKey1()
-    {
-        return $this->getParameter('key1');
-    }
-
-    /**
-     * @param mixed $value
-     * @return $this
-     */
-    public function setKey1($value)
-    {
-        return $this->setParameter('key1', $value);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getKey2()
-    {
-        return $this->getParameter('key2');
-    }
-
-    /**
-     * @param mixed $value
-     * @return $this
-     */
-    public function setKey2($value)
-    {
-        return $this->setParameter('key2', $value);
-    }
-
-    /**
+     * Builds the signed payment request: a QR code and an app link for the Viamo app.
+     *
      * @param array<string, mixed> $parameters
-     * @return AbstractRequest
      */
-    public function purchase(array $parameters = [])
+    public function purchase(array $parameters = []): PurchaseRequest
     {
-        return $this->createRequest(PurchaseRequest::class, $parameters);
+        return new PurchaseRequest($this->httpClient, $this->httpRequest)->initialize($this->requestParameters($parameters));
     }
 
     /**
+     * Verifies the `responseString` that Viamo appends to the return URL.
+     *
      * @param array<string, mixed> $parameters
-     * @return AbstractRequest
      */
-    public function completePurchase(array $parameters = [])
+    public function completePurchase(array $parameters = []): CompletePurchaseRequest
     {
-        return $this->createRequest(CompletePurchaseRequest::class, $parameters);
+        return new CompletePurchaseRequest($this->httpClient, $this->httpRequest)->initialize($this->requestParameters($parameters));
     }
 
     /**
-     * @param array<string, mixed> $json
-     * @return AbstractRequest
+     * Verifies a webhook notification. Pass the decoded JSON body as the `json` parameter.
+     *
+     * @param array<string, mixed> $parameters
      */
-    public function webhook(array $json = [])
+    public function webhook(array $parameters = []): WebhookRequest
     {
-        return $this->createRequest(WebhookRequest::class, $json);
+        return new WebhookRequest($this->httpClient, $this->httpRequest)->initialize($this->requestParameters($parameters));
+    }
+
+    /**
+     * The gateway parameters overridden by the request parameters, like AbstractGateway::createRequest().
+     *
+     * @param array<string, mixed> $parameters
+     * @return array<mixed>
+     */
+    private function requestParameters(array $parameters): array
+    {
+        return array_replace($this->getParameters(), $parameters);
     }
 }

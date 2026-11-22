@@ -1,118 +1,64 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Omnipay\Viamo\Message;
 
 use Omnipay\Common\Message\AbstractRequest;
+use Omnipay\Viamo\Core\CredentialsParameters;
 use Omnipay\Viamo\Core\Str;
 use Omnipay\Viamo\Core\ViamoSign;
 
-class WebhookRequest extends AbstractRequest
+/**
+ * Verifies a Viamo webhook notification (the decoded JSON body, passed as the `json` parameter).
+ */
+final class WebhookRequest extends AbstractRequest
 {
-    /**
-     * @param array<mixed> $parameters
-     * @return $this
-     */
-    public function initialize(array $parameters = [])
-    {
-        parent::initialize($parameters);
-        return $this;
-    }
+    use CredentialsParameters;
 
     /**
-     * @return mixed
+     * @param array<mixed>|null $json
      */
-    public function getBid()
-    {
-        return $this->getParameter('bid');
-    }
-
-    /**
-     * @param mixed $value
-     * @return $this
-     */
-    public function setBid($value)
-    {
-        return $this->setParameter('bid', $value);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getKey1()
-    {
-        return $this->getParameter('key1');
-    }
-
-    /**
-     * @param mixed $value
-     * @return $this
-     */
-    public function setKey1($value)
-    {
-        return $this->setParameter('key1', $value);
-    }
-
-    /**
-     * @param mixed $value
-     * @return $this
-     */
-    public function setKey2($value)
-    {
-        return $this->setParameter('key2', $value);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getKey2()
-    {
-        return $this->getParameter('key2');
-    }
-
-    /**
-     * @param mixed $json
-     * @return $this
-     */
-    public function setJson($json)
+    public function setJson(?array $json): static
     {
         return $this->setParameter('json', $json);
     }
 
     /**
-     * @return mixed
+     * @return array<mixed>|null
      */
-    public function getJson()
-    {
-        return $this->getParameter('json');
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function getData()
-    {
-        $this->validate('bid', 'key2', 'json');
-        return [];
-    }
-
-    /**
-     * @param mixed $data
-     * @return WebhookResponse
-     */
-    public function sendData($data)
+    public function getJson(): ?array
     {
         $json = $this->getParameter('json');
 
-        if (is_array($json) && isset($json['payment'])) {
-            $payment = $json['payment'];
-        } else {
-            return $this->response = new WebhookResponse($this, ['success' => false, 'error' => 'Missing payment data']);
+        return is_array($json) ? $json : null;
+    }
+
+    /**
+     * @return array{}
+     */
+    #[\Override]
+    public function getData(): array
+    {
+        $this->validate('bid', 'key2', 'json');
+
+        return [];
+    }
+
+    #[\Override]
+    public function sendData(mixed $data): WebhookResponse
+    {
+        $json = $this->getJson();
+
+        if ($json === null || !isset($json['payment'])) {
+            return $this->respond(['success' => false, 'error' => 'Missing payment data']);
         }
+        $payment = $json['payment'];
         if (!is_array($payment) || !isset($payment['result']) || !isset($payment['amount']) || !isset($payment['id'])) {
-            return $this->response = new WebhookResponse($this, ['success' => false, 'error' => 'Missing payment parameter']);
+            return $this->respond(['success' => false, 'error' => 'Missing payment parameter']);
         }
         if (!isset($json['signature']) || !is_array($json['signature']) || !isset($json['signature']['sign'])) {
-            return $this->response = new WebhookResponse($this, ['success' => false, 'error' => 'Missing signature']);
+            return $this->respond(['success' => false, 'error' => 'Missing signature']);
         }
 
         $notificationId = $json['notificationId'] ?? null;
@@ -127,15 +73,23 @@ class WebhookRequest extends AbstractRequest
         $textToSign .= Str::from($payment['amount']);
         $textToSign .= Str::from($payment['id']);
 
-        $viamoSign = new ViamoSign();
+        $result = ['vs' => $payment['vs'] ?? null, 'payment_id' => $payment['id'], 'notification_id' => $notificationId];
 
-        if ($viamoSign->sign($textToSign, $this->getKey2()) !== strtoupper(Str::from($json['signature']['sign']))) {
-            return $this->response = new WebhookResponse($this, ['success' => false, 'error' => 'Wrong signature', 'vs' => $payment['vs'], 'payment_id' => $payment['id'], 'notification_id' => $notificationId]);
+        if (!new ViamoSign()->verify($textToSign, (string) $this->getKey2(), $json['signature']['sign'])) {
+            return $this->respond(['success' => false, 'error' => 'Wrong signature'] + $result);
         }
         if ($payment['result'] !== 'OK') {
-            return $this->response = new WebhookResponse($this, ['success' => false, 'error' => 'Invalid result', 'vs' => $payment['vs'], 'payment_id' => $payment['id'], 'notification_id' => $notificationId]);
+            return $this->respond(['success' => false, 'error' => 'Invalid result'] + $result);
         }
 
-        return $this->response = new WebhookResponse($this, ['success' => true, 'vs' => $payment['vs'], 'notification_id' => $notificationId, 'payment_id' => $payment['id']]);
+        return $this->respond(['success' => true] + $result);
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function respond(array $data): WebhookResponse
+    {
+        return $this->response = new WebhookResponse($this, $data);
     }
 }

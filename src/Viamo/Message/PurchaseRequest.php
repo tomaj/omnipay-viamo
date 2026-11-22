@@ -1,216 +1,137 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Omnipay\Viamo\Message;
 
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Omnipay\Common\Message\AbstractRequest;
+use Omnipay\Viamo\Core\CredentialsParameters;
 use Omnipay\Viamo\Core\Str;
 use Omnipay\Viamo\Core\ViamoSign;
 
-class PurchaseRequest extends AbstractRequest
+/**
+ * Builds the signed Viamo payment request (`QP:1.0*BID:…*AM:…*SIG:…`) and renders it as a QR code and an app link.
+ */
+final class PurchaseRequest extends AbstractRequest
 {
-    /**
-     * @param array<mixed> $parameters
-     * @return $this
-     */
-    public function initialize(array $parameters = [])
-    {
-        parent::initialize($parameters);
-        return $this;
-    }
+    use CredentialsParameters;
+
+    public const string QR_ENDPOINT = 'https://qr.viamo.sk/api/';
+
+    public const int QR_TEMPLATE = 300;
 
     /**
-     * @return mixed
+     * The URL Viamo returns the customer to, with the signed `responseString` appended.
      */
-    public function getBid()
+    public function getRurl(): ?string
     {
-        return $this->getParameter('bid');
+        return Str::nullable($this->getParameter('rurl'));
     }
 
-    /**
-     * @param mixed $value
-     * @return $this
-     */
-    public function setBid($value)
-    {
-        return $this->setParameter('bid', $value);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getKey1()
-    {
-        return $this->getParameter('key1');
-    }
-
-    /**
-     * @param mixed $value
-     * @return $this
-     */
-    public function setKey1($value)
-    {
-        return $this->setParameter('key1', $value);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getKey2()
-    {
-        return $this->getParameter('key2');
-    }
-
-    /**
-     * @param mixed $value
-     * @return $this
-     */
-    public function setKey2($value)
-    {
-        return $this->setParameter('key2', $value);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getRurl()
-    {
-        return $this->getParameter('rurl');
-    }
-
-    /**
-     * @param mixed $value
-     * @return $this
-     */
-    public function setRurl($value)
+    public function setRurl(?string $value): static
     {
         return $this->setParameter('rurl', $value);
     }
 
     /**
-     * @param mixed $value
-     * @return $this
+     * Variable symbol: identifies the order in the payment result.
      */
-    public function setVs($value)
+    public function getVs(): ?string
+    {
+        return Str::nullable($this->getParameter('vs'));
+    }
+
+    public function setVs(?string $value): static
     {
         return $this->setParameter('vs', $value);
     }
 
     /**
-     * @return mixed
+     * Constant symbol.
      */
-    public function getVs()
+    public function getCs(): ?string
     {
-        return $this->getParameter('vs');
+        return Str::nullable($this->getParameter('cs'));
     }
 
-    /**
-     * @param mixed $value
-     * @return $this
-     */
-    public function setCs($value)
+    public function setCs(?string $value): static
     {
         return $this->setParameter('cs', $value);
     }
 
     /**
-     * @return mixed
+     * Specific symbol.
      */
-    public function getCs()
+    public function getSs(): ?string
     {
-        return $this->getParameter('cs');
+        return Str::nullable($this->getParameter('ss'));
     }
 
-    /**
-     * @param mixed $value
-     * @return $this
-     */
-    public function setSs($value)
+    public function setSs(?string $value): static
     {
         return $this->setParameter('ss', $value);
     }
 
     /**
-     * @return mixed
+     * Message for the payer.
      */
-    public function getSs()
+    public function getMsg(): ?string
     {
-        return $this->getParameter('ss');
+        return Str::nullable($this->getParameter('msg'));
     }
 
-    /**
-     * @param mixed $value
-     * @return $this
-     */
-    public function setMsg($value)
+    public function setMsg(?string $value): static
     {
         return $this->setParameter('msg', $value);
     }
 
     /**
-     * @return mixed
+     * Stored for the caller; Viamo's request string has no field for it.
      */
-    public function getMsg()
+    public function getDt(): ?string
     {
-        return $this->getParameter('msg');
+        return Str::nullable($this->getParameter('dt'));
     }
 
-    /**
-     * @param mixed $value
-     * @return $this
-     */
-    public function setDt($value)
+    public function setDt(?string $value): static
     {
         return $this->setParameter('dt', $value);
     }
 
     /**
-     * @return mixed
+     * `RPT` field of the request string, sent as an integer.
      */
-    public function getDt()
+    public function getRpt(): ?string
     {
-        return $this->getParameter('dt');
+        return Str::nullable($this->getParameter('rpt'));
+    }
+
+    public function setRpt(int|string|null $value): static
+    {
+        return $this->setParameter('rpt', $value === null ? null : (string) $value);
     }
 
     /**
-     * @param mixed $value
-     * @return $this
+     * @return array{}
      */
-    public function setRpt($value)
-    {
-        return $this->setParameter('rpt', $value);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getRpt()
-    {
-        return $this->getParameter('rpt');
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function getData()
+    #[\Override]
+    public function getData(): array
     {
         $this->validate('bid', 'key1', 'key2');
+
         return [];
     }
 
-    /**
-     * @param mixed $data
-     * @return PurchaseResponse
-     */
-    public function sendData($data)
+    #[\Override]
+    public function sendData(mixed $data): PurchaseResponse
     {
-        $data = is_array($data) ? $data : [];
-        $params = [];
-
-        $params['QP'] = '1.0';
-        $params['BID'] = $this->getBid();
-        $params['AM'] = $this->getAmount();
+        $params = [
+            'QP' => '1.0',
+            'BID' => $this->getBid(),
+            'AM' => $this->getAmount(),
+        ];
         if ((bool) $this->getCurrency()) {
             $params['CC'] = $this->getCurrency();
         }
@@ -224,7 +145,7 @@ class PurchaseRequest extends AbstractRequest
             $params['SS'] = $this->getSs();
         }
         if ((bool) $this->getRpt()) {
-            $params['RPT'] = intval(Str::from($this->getRpt()));
+            $params['RPT'] = (string) (int) $this->getRpt();
         }
         if ((bool) $this->getMsg()) {
             $params['MSG'] = $this->getMsg();
@@ -232,53 +153,42 @@ class PurchaseRequest extends AbstractRequest
 
         $requestString = $this->prepareRequestString($params);
 
-        $data['vs'] = $this->getVs();
-        $data['template'] = 300;
-        $data['qr_url'] = $this->getQrEndpoint() . '?text=' . $requestString . '&template=' . $data['template'];
-        $qrCode = new QrCode(data: $requestString, size: 300);
+        $qrCode = new QrCode(data: $requestString, size: self::QR_TEMPLATE);
 
-        $writer = new PngWriter();
-        $data['qr_data'] = base64_encode($writer->write($qrCode)->getString());
+        $responseData = [
+            'vs' => $this->getVs(),
+            'template' => self::QR_TEMPLATE,
+            'qr_url' => $this->getQrEndpoint() . '?text=' . $requestString . '&template=' . self::QR_TEMPLATE,
+            'qr_data' => base64_encode(new PngWriter()->write($qrCode)->getString()),
+        ];
 
         if ((bool) $this->getRurl()) {
-            $params['RURL'] = str_replace('*', '%2A', Str::from($this->getRurl()));
+            $params['RURL'] = str_replace('*', '%2A', $this->getRurl());
         }
 
-        $appRequestString = $this->prepareRequestString($params);
+        $app = $this->getTestMode() ? 'viamo-staging' : 'viamo';
+        $responseData['app_link'] = $app . '://?requestString=' . $this->prepareRequestString($params);
 
-        $app = 'viamo';
-        if ($this->getTestMode()) {
-            $app = 'viamo-staging';
-        }
-        $data['app_link'] = $app . '://?requestString=' . $appRequestString;
+        return $this->response = new PurchaseResponse($this, $responseData);
+    }
 
-        return $this->response = new PurchaseResponse($this, $data);
+    public function getQrEndpoint(): string
+    {
+        return self::QR_ENDPOINT;
     }
 
     /**
-     * @param array<string, mixed> $params
+     * @param array<string, ?string> $params
      */
     private function prepareRequestString(array $params): string
     {
         $paramsStrings = [];
         foreach ($params as $key => $value) {
-            $paramsStrings[] = $key . ':' . Str::from($value);
+            $paramsStrings[] = $key . ':' . $value;
         }
 
         $requestString = implode('*', $paramsStrings);
 
-        $sign = new ViamoSign();
-
-        $requestString .= '*SIG:' . $sign->sign($requestString, $this->getKey1());
-
-        return $requestString;
-    }
-
-    /**
-     * @return string
-     */
-    public function getQrEndpoint()
-    {
-        return 'https://qr.viamo.sk/api/';
+        return $requestString . '*SIG:' . new ViamoSign()->sign($requestString, (string) $this->getKey1());
     }
 }

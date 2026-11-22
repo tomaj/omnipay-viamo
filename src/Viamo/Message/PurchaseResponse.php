@@ -1,35 +1,61 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Omnipay\Viamo\Message;
 
 use Omnipay\Common\Message\AbstractResponse;
+use Omnipay\Viamo\Core\Str;
 
-class PurchaseResponse extends AbstractResponse // implements RedirectResponseInterface
+/**
+ * The payment request as a QR code and an app link. It is not a redirect: show the QR code
+ * or open the app link, then wait for the return URL or the webhook.
+ */
+final class PurchaseResponse extends AbstractResponse
 {
-    /**
-     * @return bool
-     */
-    public function isSuccessful()
+    #[\Override]
+    public function isSuccessful(): bool
     {
         return true;
     }
 
-    /**
-     * @return bool
-     */
-    public function isRedirect()
+    #[\Override]
+    public function isRedirect(): bool
     {
         return false;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getVs()
+    public function getVs(): ?string
     {
-        if (is_array($this->data) && isset($this->data['vs'])) {
-            return $this->data['vs'];
-        }
-        return false;
+        return $this->getValue('vs');
+    }
+
+    /**
+     * The QR code as a base64-encoded PNG image.
+     */
+    public function getQrData(): ?string
+    {
+        return $this->getValue('qr_data');
+    }
+
+    /**
+     * URL of Viamo's QR API that renders the same QR code.
+     */
+    public function getQrUrl(): ?string
+    {
+        return $this->getValue('qr_url');
+    }
+
+    /**
+     * `viamo://` (`viamo-staging://` in test mode) link that opens the payment in the Viamo app.
+     */
+    public function getAppLink(): ?string
+    {
+        return $this->getValue('app_link');
+    }
+
+    private function getValue(string $key): ?string
+    {
+        return is_array($this->data) ? Str::nullable($this->data[$key] ?? null) : null;
     }
 }

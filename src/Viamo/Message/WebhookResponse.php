@@ -1,64 +1,66 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Omnipay\Viamo\Message;
 
 use Omnipay\Common\Message\AbstractResponse;
+use Omnipay\Viamo\Core\Str;
 
-class WebhookResponse extends AbstractResponse
+/**
+ * The verified webhook notification.
+ */
+final class WebhookResponse extends AbstractResponse
 {
     /**
-     * @return bool
+     * True only for a correctly signed notification with result `OK`.
      */
-    public function isSuccessful()
+    #[\Override]
+    public function isSuccessful(): bool
     {
-        return $this->getValue('success') === true;
+        return is_array($this->data) && ($this->data['success'] ?? null) === true;
     }
 
-    /**
-     * @return bool
-     */
-    public function isRedirect()
+    #[\Override]
+    public function isRedirect(): bool
     {
         return false;
     }
 
     /**
-     * @return mixed
+     * Why the notification was rejected (`Wrong signature`, `Invalid result`, …), or null.
      */
-    public function errorMessage()
+    public function errorMessage(): ?string
     {
         return $this->getValue('error');
     }
 
     /**
-     * @return mixed
+     * Same as errorMessage().
      */
-    public function getVs()
+    #[\Override]
+    public function getMessage(): ?string
     {
-        return $this->getValue('vs') ?? false;
+        return $this->errorMessage();
     }
 
-    /**
-     * @return mixed
-     */
-    public function getPaymentId()
+    public function getVs(): ?string
     {
-        return $this->getValue('payment_id') ?? false;
+        return $this->getValue('vs');
     }
 
-    /**
-     * @return mixed
-     */
-    public function getNotificationId()
+    public function getPaymentId(): ?string
     {
-        return $this->getValue('notification_id') ?? false;
+        return $this->getValue('payment_id');
     }
 
-    private function getValue(string $key): mixed
+    public function getNotificationId(): ?string
     {
-        if (is_array($this->data) && isset($this->data[$key])) {
-            return $this->data[$key];
-        }
-        return null;
+        return $this->getValue('notification_id');
+    }
+
+    private function getValue(string $key): ?string
+    {
+        return is_array($this->data) ? Str::nullable($this->data[$key] ?? null) : null;
     }
 }
