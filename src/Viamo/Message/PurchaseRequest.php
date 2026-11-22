@@ -110,7 +110,7 @@ final class PurchaseRequest extends AbstractRequest
 
     public function setRpt(int|string|null $value): static
     {
-        return $this->setParameter('rpt', $value === null ? null : (string) $value);
+        return $this->setParameter('rpt', $value);
     }
 
     /**
@@ -125,6 +125,12 @@ final class PurchaseRequest extends AbstractRequest
     }
 
     #[\Override]
+    public function send(): PurchaseResponse
+    {
+        return $this->sendData($this->getData());
+    }
+
+    #[\Override]
     public function sendData(mixed $data): PurchaseResponse
     {
         $params = [
@@ -132,23 +138,18 @@ final class PurchaseRequest extends AbstractRequest
             'BID' => $this->getBid(),
             'AM' => $this->getAmount(),
         ];
-        if ((bool) $this->getCurrency()) {
-            $params['CC'] = $this->getCurrency();
-        }
-        if ((bool) $this->getVs()) {
-            $params['VS'] = $this->getVs();
-        }
-        if ((bool) $this->getCs()) {
-            $params['CS'] = $this->getCs();
-        }
-        if ((bool) $this->getSs()) {
-            $params['SS'] = $this->getSs();
-        }
-        if ((bool) $this->getRpt()) {
-            $params['RPT'] = (string) (int) $this->getRpt();
-        }
-        if ((bool) $this->getMsg()) {
-            $params['MSG'] = $this->getMsg();
+        $optional = [
+            'CC' => $this->getCurrency(),
+            'VS' => $this->getVs(),
+            'CS' => $this->getCs(),
+            'SS' => $this->getSs(),
+            'RPT' => $this->getRpt(),
+            'MSG' => $this->getMsg(),
+        ];
+        foreach ($optional as $key => $value) {
+            if ($this->isFilled($value)) {
+                $params[$key] = $key === 'RPT' ? (string) (int) $value : $value;
+            }
         }
 
         $requestString = $this->prepareRequestString($params);
@@ -162,8 +163,9 @@ final class PurchaseRequest extends AbstractRequest
             'qr_data' => base64_encode(new PngWriter()->write($qrCode)->getString()),
         ];
 
-        if ((bool) $this->getRurl()) {
-            $params['RURL'] = str_replace('*', '%2A', $this->getRurl());
+        $rurl = $this->getRurl();
+        if ($this->isFilled($rurl)) {
+            $params['RURL'] = str_replace('*', '%2A', $rurl);
         }
 
         $app = $this->getTestMode() ? 'viamo-staging' : 'viamo';
@@ -175,6 +177,16 @@ final class PurchaseRequest extends AbstractRequest
     public function getQrEndpoint(): string
     {
         return self::QR_ENDPOINT;
+    }
+
+    /**
+     * Optional fields are sent only when they are not empty; "0" counts as empty, like PHP's truthiness.
+     *
+     * @phpstan-assert-if-true non-empty-string $value
+     */
+    private function isFilled(?string $value): bool
+    {
+        return !in_array($value, [null, '', '0'], true);
     }
 
     /**

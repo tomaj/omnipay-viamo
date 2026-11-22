@@ -46,6 +46,12 @@ final class WebhookRequest extends AbstractRequest
     }
 
     #[\Override]
+    public function send(): WebhookResponse
+    {
+        return $this->sendData($this->getData());
+    }
+
+    #[\Override]
     public function sendData(mixed $data): WebhookResponse
     {
         $json = $this->getJson();

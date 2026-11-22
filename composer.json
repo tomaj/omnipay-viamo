@@ -34,7 +34,7 @@
         "ext-openssl": "*",
         "endroid/qr-code": "^6.0",
         "nyholm/psr7": "^1.8",
-        "omnipay/common": "^3.3",
+        "omnipay/common": "^3.5",
         "psr/http-client": "^1.0",
         "symfony/http-client": "^7.4 || ^8.0"
     },
@@ -57,7 +57,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Omnipay\\": "tests/"
+            "Omnipay\\Viamo\\Tests\\": "tests/"
         }
     },
     "config": {

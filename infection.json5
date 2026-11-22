@@ -12,10 +12,23 @@
         "json": "build/infection.json"
     },
     "mutators": {
-        "@default": true
+        "@default": true,
+        // `if ((bool) $value)` and `if ($value)` are the same condition; the cast documents that
+        // optional webhook fields of any JSON type are signed only when truthy (as in 4.x)
+        "CastBool": {
+            "ignore": [
+                "Omnipay\\Viamo\\Message\\WebhookRequest::sendData"
+            ]
+        },
+        // `(string) (int) $rpt` is concatenated into the request string, where an int and its string are the same
+        "CastString": {
+            "ignore": [
+                "Omnipay\\Viamo\\Message\\PurchaseRequest::sendData"
+            ]
+        }
     },
-    "minMsi": 85,
-    "minCoveredMsi": 90,
+    "minMsi": 95,
+    "minCoveredMsi": 95,
     "phpUnit": {
         "configDir": "."
     }

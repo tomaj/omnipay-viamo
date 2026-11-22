@@ -92,6 +92,12 @@ final class CompletePurchaseRequest extends AbstractRequest
     }
 
     #[\Override]
+    public function send(): CompletePurchaseResponse
+    {
+        return $this->sendData($this->getData());
+    }
+
+    #[\Override]
     public function sendData(mixed $data): CompletePurchaseResponse
     {
         return $this->response = new CompletePurchaseResponse($this, $data);
