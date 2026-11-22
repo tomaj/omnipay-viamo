@@ -6,13 +6,15 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ### Added
 
-* GitHub Actions CI: tests on PHP 8.3 - 8.6 (plus `--prefer-lowest`) and a nightly PHP 8.7 job that may fail, PHP-CS-Fixer (PER-CS), PHPStan level max with strict rules, `composer audit`, Dependabot.
+* GitHub Actions CI: tests on PHP 8.4 - 8.6 (plus `--prefer-lowest`) and a nightly PHP 8.7 job that may fail, PHP-CS-Fixer (PER-CS), PHPStan level max with strict rules, Rector, `composer audit`, 90% statement coverage and Infection mutation testing, Dependabot, CodeQL, OpenSSF Scorecard, and a tag-driven release workflow ([#13](https://github.com/tomaj/omnipay-viamo/issues/13), [#14](https://github.com/tomaj/omnipay-viamo/issues/14)).
+* `LICENSE.md` (MIT), `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` and a `.gitattributes` that keeps tests and tooling out of the Composer archive ([#12](https://github.com/tomaj/omnipay-viamo/issues/12)).
 
 ### Changed
 
-* Requires `omnipay/common` ^3.3 (was ~3.0) and PHPUnit 11 for development.
-* `completePurchase()` compares the returned `BID` and `SIG` strictly (`!==`) instead of `!=`, so numeric-looking values no longer match loosely.
-* Non-string request and query values no longer emit PHP warnings or `TypeError`s while signing; they are treated as empty strings.
+* **BREAKING CHANGE**: Requires PHP 8.4 or newer (was 8.3) ([#15](https://github.com/tomaj/omnipay-viamo/issues/15)).
+* Requires `ext-gd` (the QR code is rendered as PNG with GD, which 4.x used without declaring it), `psr/http-client` and `nyholm/psr7`, so Omnipay's default HTTP client works without the `php-http/discovery` Composer plugin installing them. `symfony/http-client` 8 is allowed ([#12](https://github.com/tomaj/omnipay-viamo/issues/12)).
+* Requires `omnipay/common` ^3.3 (was ~3.0) and PHPUnit 13 for development; `omnipay/tests` is no longer used.
+* `completePurchase()` compares the returned `BID` strictly (`!==`) instead of `!=`, so numeric-looking values no longer match loosely.
 
 ## [4.0.0] - 2026-03-27
 
