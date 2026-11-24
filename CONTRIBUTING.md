@@ -60,7 +60,9 @@ examples/ci/recipe.sh shop
 
 When a change alters an example's output on purpose, update its `expected-output.txt` in the same pull request.
 
-The logo, favicon, hero illustration, feature icons, payment flow diagram and social card are generated: edit `docs/scripts/art.py`, then run `npm run art` in `docs/` (Python 3 and Google Chrome; set `CHROME_PATH` if Chrome is elsewhere) and commit the generated files.
+The site is in English and Slovak: English pages are in `docs/`, Slovak pages in `docs/sk/` with the same paths. Change both in the same pull request; `npm run docs:locales` (run in CI) fails when a page has no twin in the other language. Code and example output are shared, only the prose is translated.
+
+The logo, favicon, hero illustration, feature icons, payment flow diagram and social card are generated (the hero illustration and the payment flow diagram in English and Slovak): edit `docs/scripts/art.py`, then run `npm run art` in `docs/` (Python 3 and Google Chrome; set `CHROME_PATH` if Chrome is elsewhere) and commit the generated files.
 
 Maintainers publish releases by pushing a version tag; see [RELEASING.md](RELEASING.md).
 
