@@ -87,8 +87,12 @@
   }
 }
 
-.dark .VPHero img.image-src {
+.dark .VPHero img.image-src[src$="hero-light.svg"] {
   content: url("/omnipay-viamo/illustrations/hero-dark.svg");
+}
+
+.dark .VPHero img.image-src[src$="hero-sk-light.svg"] {
+  content: url("/omnipay-viamo/illustrations/hero-sk-dark.svg");
 }
 
 .dark .VPFeature img[src$="qr.svg"] { content: url("/omnipay-viamo/icons/qr-dark.svg"); }

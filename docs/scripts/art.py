@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """Generate the hand-made SVG artwork of the documentation site (light and dark variants).
 
-    python3 docs/scripts/art.py           # writes docs/public/{logo,illustrations,icons,diagrams}
+    python3 docs/scripts/art.py           # writes docs/public/{logo,illustrations,icons,diagrams} (English and -sk)
     node docs/scripts/og-image.mjs        # then rasterizes og.png and the PNG/ICO favicons
 
 The omnipay-* packages share one visual family: a 60 x 60 rounded square (rx 14) in the bank's colour with
 a white glyph, flat shapes, system fonts. omnipay-viamo is the green one; its glyph is a "V"
 tick next to a QR-code finder square.
+
+The hero illustration and the payment flow diagram contain text, so they are written once per language:
+English with the plain name, Slovak with a -sk suffix (illustrations/hero-sk-light.svg,
+diagrams/payment-flow-sk-dark.svg), used by the pages under docs/sk/. The labels are in STRINGS.
 """
 
 from __future__ import annotations
@@ -121,10 +125,10 @@ def qr(x: float, y: float, size: float, color: str, seed: int = 7) -> str:
 
 # --- hero illustration ----------------------------------------------------------------------
 
-def hero(theme: str) -> str:
+def hero(theme: str, w: dict) -> str:
     t = THEMES[theme]
     return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 560" role="img">
-  <title>A shop shows a signed Viamo QR code, the customer pays in the Viamo app, and the shop verifies the return URL and the webhook</title>
+  <title>{w['title']}</title>
   <defs>
     <linearGradient id="wash" x1="0" y1="0" x2="640" y2="560" gradientUnits="userSpaceOnUse">
       <stop stop-color="{t['wash1']}"/>
@@ -147,10 +151,10 @@ def hero(theme: str) -> str:
     <circle cx="88" cy="69" r="5" fill="{t['card_line']}"/>
     <rect x="108" y="61" width="200" height="16" rx="8" fill="{t['card']}"/>
     <text x="120" y="73.5" font-size="11" fill="{t['muted']}">shop.example/checkout</text>
-    <text x="56" y="118" font-size="13" fill="{t['muted']}">Order 2026000123</text>
-    <text x="56" y="148" font-size="26" font-weight="700" fill="{t['text']}">24.90 €</text>
-    <text x="56" y="176" font-size="12.5" fill="{t['muted']}">Scan with the</text>
-    <text x="56" y="194" font-size="12.5" fill="{t['muted']}">Viamo app</text>
+    <text x="56" y="118" font-size="13" fill="{t['muted']}">{w['order']}</text>
+    <text x="56" y="148" font-size="26" font-weight="700" fill="{t['text']}">{w['amount']}</text>
+    <text x="56" y="176" font-size="12.5" fill="{t['muted']}">{w['scan1']}</text>
+    <text x="56" y="194" font-size="12.5" fill="{t['muted']}">{w['scan2']}</text>
     <rect x="56" y="214" width="96" height="30" rx="15" fill="{t['accent']}"/>
     <text x="104" y="233.5" font-size="12" font-weight="600" fill="#ffffff" text-anchor="middle">purchase()</text>
     <rect x="196" y="106" width="122" height="122" rx="10" fill="#ffffff" stroke="{t['card_line']}"/>
@@ -160,7 +164,7 @@ def hero(theme: str) -> str:
 
     <!-- scan -->
     <path d="M318 172 C 360 172, 372 160, 404 160" fill="none" stroke="{t['arrow']}" stroke-width="2.5" stroke-dasharray="6 6" marker-end="url(#head)"/>
-    <text x="352" y="150" font-size="12" font-weight="600" fill="{t['brand']}" text-anchor="middle">scan</text>
+    <text x="352" y="150" font-size="12" font-weight="600" fill="{t['brand']}" text-anchor="middle">{w['scan']}</text>
 
     <!-- the phone -->
     <rect x="412" y="40" width="190" height="370" rx="32" fill="{t['phone']}"/>
@@ -169,20 +173,20 @@ def hero(theme: str) -> str:
     <path d="M422 74a24 24 0 0 1 24-24h122a24 24 0 0 1 24 24v32H422z" fill="{t['mark']}"/>
     {mark({**t, 'mark': t['mark_dark']}, 436, 70, 30)}
     <text x="474" y="91" font-size="16" font-weight="700" fill="#ffffff">Viamo</text>
-    <text x="507" y="146" font-size="12" fill="{t['muted']}" text-anchor="middle">Pay to Shop Example</text>
-    <text x="507" y="184" font-size="30" font-weight="700" fill="{t['text']}" text-anchor="middle">24.90 €</text>
+    <text x="507" y="146" font-size="12" fill="{t['muted']}" text-anchor="middle">{w['payTo']}</text>
+    <text x="507" y="184" font-size="30" font-weight="700" fill="{t['text']}" text-anchor="middle">{w['amount']}</text>
     <rect x="440" y="204" width="134" height="1" fill="{t['card_line']}"/>
     <text x="442" y="228" font-size="11" fill="{t['muted']}">VS</text>
     <text x="572" y="228" font-size="11" fill="{t['text']}" text-anchor="end">2026000123</text>
-    <text x="442" y="250" font-size="11" fill="{t['muted']}">Message</text>
-    <text x="572" y="250" font-size="11" fill="{t['text']}" text-anchor="end">Order 2026…</text>
+    <text x="442" y="250" font-size="11" fill="{t['muted']}">{w['message']}</text>
+    <text x="572" y="250" font-size="11" fill="{t['text']}" text-anchor="end">{w['orderShort']}</text>
     <rect x="440" y="300" width="134" height="40" rx="20" fill="{t['accent']}"/>
     <path d="M478 320l7 7 13-14" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-    <text x="507" y="325" font-size="14" font-weight="700" fill="#ffffff">Pay</text>
+    <text x="507" y="325" font-size="14" font-weight="700" fill="#ffffff">{w['pay']}</text>
 
     <!-- back to the shop -->
     <rect x="34" y="384" width="300" height="140" rx="18" fill="{t['card']}" stroke="{t['card_line']}" stroke-width="1.5"/>
-    <text x="56" y="416" font-size="13" font-weight="700" fill="{t['text']}">Your shop</text>
+    <text x="56" y="416" font-size="13" font-weight="700" fill="{t['text']}">{w['shop']}</text>
     <rect x="56" y="432" width="256" height="34" rx="10" fill="{t['soft']}"/>
     <circle cx="74" cy="449" r="9" fill="{t['accent']}"/>
     <path d="M69.5 449l3 3 6-6" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -191,13 +195,13 @@ def hero(theme: str) -> str:
     <circle cx="74" cy="491" r="9" fill="{t['key2']}"/>
     <path d="M69.5 491l3 3 6-6" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     <text x="92" y="495.5" font-size="12.5" fill="{t['text']}" font-family="{MONO}">webhook()</text>
-    <text x="300" y="495.5" font-size="11" fill="{t['muted']}" text-anchor="end">paid</text>
+    <text x="300" y="495.5" font-size="11" fill="{t['muted']}" text-anchor="end">{w['paid']}</text>
     <text x="300" y="453.5" font-size="11" fill="{t['muted']}" text-anchor="end">RES:OK</text>
 
     <path d="M470 412 C 470 452, 420 449, 348 449" fill="none" stroke="{t['arrow']}" stroke-width="2.5" marker-end="url(#head)"/>
     <path d="M548 412 C 548 486, 460 491, 348 491" fill="none" stroke="{t['key2']}" stroke-width="2.5" marker-end="url(#head2)"/>
-    <text x="352" y="475" font-size="11.5" font-weight="600" fill="{t['brand']}">return URL · key1</text>
-    <text x="456" y="520" font-size="11.5" font-weight="600" fill="{t['key2']}">webhook · key2</text>
+    <text x="352" y="475" font-size="11.5" font-weight="600" fill="{t['brand']}">{w['returnUrl']}</text>
+    <text x="456" y="520" font-size="11.5" font-weight="600" fill="{t['key2']}">{w['webhook']}</text>
   </g>
 </svg>"""
 
@@ -247,11 +251,11 @@ def icon(name: str, theme: str) -> str:
 
 # --- payment flow diagram -------------------------------------------------------------------
 
-def flow(theme: str) -> str:
+def flow(theme: str, w: dict) -> str:
     t = THEMES[theme]
-    lanes = [("Customer", "browser or phone", 110), ("Your shop", "omnipay-viamo", 350), ("Viamo app", "on the phone", 590), ("Viamo", "server", 830)]
+    lanes = [(*w["lanes"][0], 110), (*w["lanes"][1], 350), (*w["lanes"][2], 590), (*w["lanes"][3], 830)]
     out = [f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 690" role="img">
-  <title>Viamo payment flow: purchase, scan and confirm, webhook, return URL</title>
+  <title>{w['title']}</title>
   <defs>
     <marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M1 1 9 5 1 9z" fill="{t['arrow']}"/></marker>
     <marker id="b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M1 1 9 5 1 9z" fill="{t['key2']}"/></marker>
@@ -286,18 +290,18 @@ def flow(theme: str) -> str:
     <text x="{x - 70}" y="{y - 2}" font-size="12.5" font-weight="700" fill="{t['text']}">{label}</text>
     <text x="{x - 70}" y="{y + 15}" font-size="11" fill="{t['muted']}" font-family="{MONO}">{code}</text>""")
 
-    arrow(120, 110, 350, "checkout")
-    note(160, 350, "1", "purchase()", "signs the request, key1")
-    arrow(222, 350, 110, "QR code or app link", "viamo://?requestString=…*SIG:…")
-    arrow(290, 110, 590, "scan the QR code or open the link", color=t["muted"], marker="c", dashed=True)
-    arrow(350, 590, 830, "check SIG, customer confirms", color=t["muted"], marker="c", dashed=True)
-    arrow(410, 830, 350, "POST webhook: JSON + signature", "rid vs e2e result amount id, key2", color=t["key2"], marker="b")
-    note(452, 350, "2", "webhook()", "verifies key2, result OK")
+    arrow(120, 110, 350, w["checkout"])
+    note(160, 350, "1", "purchase()", w["signs"])
+    arrow(222, 350, 110, w["qrOrLink"], "viamo://?requestString=…*SIG:…")
+    arrow(290, 110, 590, w["scan"], color=t["muted"], marker="c", dashed=True)
+    arrow(350, 590, 830, w["confirm"], color=t["muted"], marker="c", dashed=True)
+    arrow(410, 830, 350, w["post"], "rid vs e2e result amount id, key2", color=t["key2"], marker="b")
+    note(452, 350, "2", "webhook()", w["verifiesKey2"])
     arrow(520, 590, 350, "GET rurl?responseString=…", "BID:42*VS:…*RES:OK*SIG:…, key1")
-    note(580, 350, "3", "completePurchase()", "verifies BID and key1")
+    note(580, 350, "3", "completePurchase()", w["verifiesKey1"])
     out.append(f"""
     <rect x="50" y="628" width="840" height="42" rx="12" fill="{t['soft']}"/>
-    <text x="470" y="654" font-size="13" fill="{t['text']}" text-anchor="middle">2 and 3 arrive in any order, or only one of them: find the order by VS, check the amount, mark it paid once.</text>
+    <text x="470" y="654" font-size="13" fill="{t['text']}" text-anchor="middle">{w['footer']}</text>
   </g>
 </svg>""")
     return "".join(out)
@@ -334,14 +338,52 @@ def og() -> str:
 </svg>"""
 
 
+# Labels per language: "" writes the English files, "-sk" the Slovak ones.
+STRINGS = {
+    "": {
+        "hero": {
+            "title": "A shop shows a signed Viamo QR code, the customer pays in the Viamo app, and the shop verifies the return URL and the webhook",
+            "order": "Order 2026000123", "amount": "24.90 €", "scan1": "Scan with the", "scan2": "Viamo app", "scan": "scan",
+            "payTo": "Pay to Shop Example", "message": "Message", "orderShort": "Order 2026…", "pay": "Pay",
+            "shop": "Your shop", "paid": "paid", "returnUrl": "return URL · key1", "webhook": "webhook · key2",
+        },
+        "flow": {
+            "title": "Viamo payment flow: purchase, scan and confirm, webhook, return URL",
+            "lanes": [("Customer", "browser or phone"), ("Your shop", "omnipay-viamo"), ("Viamo app", "on the phone"), ("Viamo", "server")],
+            "checkout": "checkout", "signs": "signs the request, key1", "qrOrLink": "QR code or app link",
+            "scan": "scan the QR code or open the link", "confirm": "check SIG, customer confirms",
+            "post": "POST webhook: JSON + signature", "verifiesKey2": "verifies key2, result OK", "verifiesKey1": "verifies BID and key1",
+            "footer": "2 and 3 arrive in any order, or only one of them: find the order by VS, check the amount, mark it paid once.",
+        },
+    },
+    "-sk": {
+        "hero": {
+            "title": "E-shop zobrazí podpísaný QR kód Viamo, zákazník zaplatí v mobilnej aplikácii Viamo a e-shop overí návratovú URL aj notifikáciu",
+            "order": "Obj. č. 2026000123", "amount": "24,90 €", "scan1": "Naskenujte", "scan2": "v aplikácii Viamo", "scan": "skenovať",
+            "payTo": "Platba pre Shop Example", "message": "Správa", "orderShort": "Obj. 2026…", "pay": "Zaplatiť",
+            "shop": "Váš e-shop", "paid": "zaplatené", "returnUrl": "návratová URL · key1", "webhook": "webhook · key2",
+        },
+        "flow": {
+            "title": "Priebeh platby Viamo: purchase, naskenovanie a potvrdenie, notifikácia (webhook), návratová URL",
+            "lanes": [("Zákazník", "prehliadač alebo mobil"), ("Váš e-shop", "omnipay-viamo"), ("Aplikácia Viamo", "v mobile"), ("Viamo", "server")],
+            "checkout": "objednávka", "signs": "podpíše požiadavku, key1", "qrOrLink": "QR kód alebo odkaz do aplikácie",
+            "scan": "naskenuje QR kód alebo otvorí odkaz", "confirm": "overí SIG, zákazník potvrdí",
+            "post": "POST webhook: JSON + podpis", "verifiesKey2": "overí key2, result OK", "verifiesKey1": "overí BID a key1",
+            "footer": "2 a 3 prídu v ľubovoľnom poradí alebo len jedna z nich: nájdite objednávku podľa VS, overte sumu, označte ju ako zaplatenú raz.",
+        },
+    },
+}
+
+
 def main() -> None:
     write("logo.svg", logo("light"))
     write("logo-dark.svg", logo("dark"))
     write("favicon.svg", logo("light"))
     for theme in THEMES:
         suffix = "" if theme == "light" else "-dark"
-        write(f"illustrations/hero-{theme}.svg", hero(theme))
-        write(f"diagrams/payment-flow-{theme}.svg", flow(theme))
+        for lang, words in STRINGS.items():
+            write(f"illustrations/hero{lang}-{theme}.svg", hero(theme, words["hero"]))
+            write(f"diagrams/payment-flow{lang}-{theme}.svg", flow(theme, words["flow"]))
         for name in ICONS:
             write(f"icons/{name}{suffix}.svg", icon(name, theme))
     write("og.svg", og())
