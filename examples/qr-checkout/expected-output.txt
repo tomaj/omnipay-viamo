@@ -1,10 +1,12 @@
 successful: true, redirect: false
 variable symbol: 2026000123
 request string: QP:1.0*BID:42*AM:24.90*CC:EUR*VS:2026000123*MSG:Order 2026000123*SIG:5B0A9AE6F98801683C4D63687D2B3FD8
-QR API URL: https://qr.viamo.sk/api/?text=QP:1.0*BID:42*AM:24.90*CC:EUR*VS:2026000123*MSG:Order 2026000123*SIG:5B0A9AE6F98801683C4D63687D2B3FD8&template=300
+QR API URL: https://qr.viamo.sk/api/?text=QP%3A1.0%2ABID%3A42%2AAM%3A24.90%2ACC%3AEUR%2AVS%3A2026000123%2AMSG%3AOrder%202026000123%2ASIG%3A5B0A9AE6F98801683C4D63687D2B3FD8&template=300
 QR code: image/png, 320x320 px
 <img alt="Pay with Viamo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA…">
-app link: viamo://?requestString=QP:1.0*BID:42*AM:24.90*CC:EUR*VS:2026000123*MSG:Order 2026000123*RURL:https://shop.example/viamo/return?order=2026000123*SIG:DF2A817C8B1A274AD04619AF4B6897B4
-test mode app link: viamo-staging://?requestString=QP:1.0*BID:42*AM:24.90*CC:EUR*VS:2026000123*SIG:06AEA83F65D64C0EEC9242385FF5916A
+app link: viamo://?requestString=QP%3A1.0%2ABID%3A42%2AAM%3A24.90%2ACC%3AEUR%2AVS%3A2026000123%2AMSG%3AOrder%202026000123%2ARURL%3Ahttps%3A%2F%2Fshop.example%2Fviamo%2Freturn%3Forder%3D2026000123%2ASIG%3ADF2A817C8B1A274AD04619AF4B6897B4
+app link request string: QP:1.0*BID:42*AM:24.90*CC:EUR*VS:2026000123*MSG:Order 2026000123*RURL:https://shop.example/viamo/return?order=2026000123*SIG:DF2A817C8B1A274AD04619AF4B6897B4
+msg "Gift*AM:0.01": The msg parameter must not contain "*", the field separator of the Viamo request string
+test mode app link: viamo-staging://?requestString=QP%3A1.0%2ABID%3A42%2AAM%3A24.90%2ACC%3AEUR%2AVS%3A2026000123%2ASIG%3A06AEA83F65D64C0EEC9242385FF5916A
 openssl: SIG of the request string matches (5B0A9AE6F98801683C4D63687D2B3FD8)
 openssl: SIG of the app link matches (DF2A817C8B1A274AD04619AF4B6897B4)

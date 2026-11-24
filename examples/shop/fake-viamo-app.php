@@ -56,7 +56,7 @@ foreach ($customers as ['order' => $order, 'action' => $action]) {
     echo "shop checkout page: {$status} \"{$title[1]}\", QR code ", str_contains($page, 'data:image/png;base64,') ? 'shown' : 'missing', PHP_EOL;
 
     $appLink = html_entity_decode($link[1]);
-    $requestString = substr($appLink, strlen('viamo://?requestString='));
+    $requestString = rawurldecode(substr($appLink, strlen('viamo://?requestString=')));
     if ($action === 'tamper') {
         // someone edits the amount in the link before the app opens it
         $requestString = preg_replace('/\*AM:[^*]+/', '*AM:1.00', $requestString);

@@ -21,4 +21,4 @@ check() { # check <label> <signed string ending with *SIG:…>
     fi
 }
 check "request string" "$(echo "$output" | sed -n 's/^request string: //p')"
-check "app link" "$(echo "$output" | sed -n 's/^app link: viamo:\/\/?requestString=//p')"
+check "app link" "$(echo "$output" | sed -n 's/^app link request string: //p')"

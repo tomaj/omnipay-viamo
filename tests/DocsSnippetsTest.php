@@ -68,7 +68,7 @@ final class DocsSnippetsTest extends TestCase
 
         self::assertMatchesRegularExpression('~^<img alt="Viamo QR code" src="data:image/png;base64,[A-Za-z0-9+/]+=*">~', $output);
         self::assertStringContainsString(
-            '<a href="viamo://?requestString=QP:1.0*BID:42*AM:10.00*CC:EUR*VS:2026000123*MSG:Order 2026000123*RURL:https://shop.example/viamo/return*SIG:',
+            '<a href="viamo://?requestString=' . rawurlencode('QP:1.0*BID:42*AM:10.00*CC:EUR*VS:2026000123*MSG:Order 2026000123*RURL:https://shop.example/viamo/return*SIG:'),
             $output,
         );
     }
@@ -100,7 +100,7 @@ final class DocsSnippetsTest extends TestCase
 
     public function testTestMode(): void
     {
-        self::assertStringStartsWith('viamo-staging://?requestString=QP:1.0*BID:42*AM:1.00*CC:EUR*VS:1*SIG:', $this->capture('test-mode.php'));
+        self::assertStringStartsWith('viamo-staging://?requestString=' . rawurlencode('QP:1.0*BID:42*AM:1.00*CC:EUR*VS:1*SIG:'), $this->capture('test-mode.php'));
     }
 
     public function testSignature(): void

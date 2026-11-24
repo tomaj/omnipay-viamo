@@ -57,9 +57,9 @@ if ($order === null) {
 }
 
 // #region amount
-// The amount is covered by the signature, but the response has no getter for it: read it
-// from the verified JSON and compare it with the order before you ship anything.
-$amount = $json['payment']['amount'];
+// getAmount() is the amount covered by the verified signature, exactly as Viamo sent it.
+// Compare it with the order before you ship anything.
+$amount = (string) $notification->getAmount();
 if (!is_numeric($amount) || number_format((float) $amount, 2, '.', '') !== $order['total']) {
     respond(422, 'rejected', "amount {$amount} does not match order {$vs} ({$order['total']})");
     return;

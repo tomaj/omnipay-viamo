@@ -69,9 +69,9 @@ switch ($_SERVER['REQUEST_METHOD'] . ' ' . parse_url($_SERVER['REQUEST_URI'], PH
             http_response_code($notification->getMessage() === 'Invalid result' ? 200 : 400);
             $log('webhook not paid: ' . ($notification->getMessage() ?? "unknown order {$vs}"));
             echo json_encode(['result' => 'not paid']);
-        } elseif ($json['payment']['amount'] !== $order['total']) {
+        } elseif ($notification->getAmount() !== $order['total']) {
             http_response_code(422);
-            $log("webhook amount {$json['payment']['amount']} does not match order {$vs}");
+            $log("webhook amount {$notification->getAmount()} does not match order {$vs}");
             echo json_encode(['result' => 'amount mismatch']);
         } else {
             $changed = $orders->markPaid($vs, 'webhook', $notification->getPaymentId());

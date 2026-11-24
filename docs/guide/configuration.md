@@ -22,7 +22,7 @@ Keep the keys out of the repository: read them from the environment or a secret 
 ### Missing and invalid values
 
 - A key that is not exactly 32 hexadecimal characters (including an empty one) throws `Omnipay\Viamo\Exception\InvalidKeyException` when it is used to sign or verify: in `purchase()->send()` for `key1`, in `completePurchase()->send()` for `key1` once the response has the right `BID`, and in `webhook()->send()` for `key2` once the notification has all fields.
-- `purchase()` and `webhook()` call Omnipay's `validate()`, which throws `InvalidRequestException` ("The bid parameter is required") only for a parameter that is `null`. A gateway created with `Omnipay::create()` starts with `''` for `bid`, `key1` and `key2`, so through the gateway the check only fires for `webhook()` without `json`. Configure `bid` explicitly: `purchase()` does not reject an empty one.
+- `purchase()` throws `InvalidRequestException` ("The bid parameter is required") when `bid`, `key1` or `amount` is `null` or an empty string; `webhook()` does the same for `bid` and `key2`, and requires `json`. A gateway created with `Omnipay::create()` starts with `''` for `bid`, `key1` and `key2`, so a gateway you forgot to configure fails here instead of signing an empty `BID`. `purchase()` does not need `key2`, and `webhook()` does not need `key1`.
 
 <<< @/snippets/errors.php
 
@@ -34,18 +34,18 @@ Passed to `purchase([...])`. Every one also has a setter and a getter on `Purcha
 
 | Parameter | Type | Request field | Meaning |
 |---|---|---|---|
-| `amount` | `string` (or a number) | `AM` | The amount, formatted by Omnipay for the currency: `'10'` becomes `10.00` for EUR and stays `5` for JPY. More decimals than the currency allows, or a negative amount, throws `InvalidRequestException`. |
+| `amount` | `string` (or a number) | `AM` | Required. The amount, formatted by Omnipay for the currency: `'10'` becomes `10.00` for EUR and stays `5` for JPY. A missing or empty amount, more decimals than the currency allows, or a negative amount throws `InvalidRequestException`. |
 | `currency` | `string` | `CC` | ISO 4217 code, for example `'EUR'`. Optional. An unknown code throws `Money\Exception\UnknownCurrencyException` from `moneyphp/money`. |
-| `vs` | `?string` | `VS` | Variable symbol: identifies the order in the webhook and on the return URL. Use your order number. |
-| `cs` | `?string` | `CS` | Constant symbol. Optional. |
-| `ss` | `?string` | `SS` | Specific symbol. Optional. |
-| `msg` | `?string` | `MSG` | Message for the payer, shown in the app. Optional. |
+| `vs` | `?string` | `VS` | Variable symbol: identifies the order in the webhook and on the return URL. Use your order number. Digits only, at most 10. |
+| `cs` | `?string` | `CS` | Constant symbol. Optional. Digits only, at most 10. |
+| `ss` | `?string` | `SS` | Specific symbol. Optional. Digits only, at most 10. |
+| `msg` | `?string` | `MSG` | Message for the payer, shown in the app. Optional. Must not contain `*`. |
 | `rpt` | `int\|string\|null` | `RPT` | Sent as an integer: `'5x'` becomes `5`, `'0'` is not sent. Optional. |
 | `rurl` | `?string` | `RURL` | Return URL. Sent only in the app link, after the other fields; every `*` in it is written as `%2A`, because `*` separates the fields. |
 | `dt` | `?string` | | Stored on the request (`getDt()`); the Viamo request string has no field for it. |
 
 ::: warning Field values must not contain `*`
-The request string is `KEY:value` pairs joined with `*`. Only `rurl` is escaped. Keep `vs`, `cs`, `ss` and `msg` to values your shop controls (an order number, `'Order 2026000123'`), never text a customer typed.
+The request string is `KEY:value` pairs joined with `*`, so a `*` inside a value would start a new field (for example a second `AM:`). `rurl` is escaped (`*` becomes `%2A`); every other value that contains `*` is refused with `InvalidRequestException` ("The msg parameter must not contain \"*\", …") before anything is signed. `vs`, `cs` and `ss` must be numbers of at most 10 digits (like the payment symbols of the Short Payment Descriptor format), anything else throws `InvalidRequestException` ("The vs parameter must be a number of at most 10 digits"). If `msg` can contain text a customer typed, remove or replace `*` first.
 :::
 
 The fields appear in the request string in this order, each only when set: `QP` (always `1.0`), `BID`, `AM`, `CC`, `VS`, `CS`, `SS`, `RPT`, `MSG`, then `SIG`. The app link adds `RURL` before `SIG` and is signed separately.

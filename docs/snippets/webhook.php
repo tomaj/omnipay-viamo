@@ -19,6 +19,7 @@ if ($notification->isSuccessful()) {
     // Correctly signed and paid: find the order by getVs(), check the amount, mark it paid.
     // Make this idempotent: the same payment can be notified more than once.
     $vs = $notification->getVs();
+    $amount = $notification->getAmount();  // signed amount as Viamo sent it, e.g. "24.90"
     $paymentId = $notification->getPaymentId();
 } else {
     error_log('Viamo webhook rejected: ' . $notification->errorMessage());

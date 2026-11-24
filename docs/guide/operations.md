@@ -29,5 +29,5 @@ When it is `false`, `getMessage()` says why. The [Error handling](./errors) page
 | Variable symbol | `getVs()` | `getVs()` | `getVs()` |
 | Result | | `getRes()`: `OK`, `FAIL`, `ERROR` | |
 | Reason of a rejection | | `getMessage()` | `getMessage()`, `errorMessage()` |
-| Payment | `getQrData()`, `getQrUrl()`, `getAppLink()` | | `getPaymentId()`, `getNotificationId()` |
+| Payment | `getQrData()`, `getQrUrl()`, `getAppLink()` | | `getAmount()`, `getPaymentId()`, `getNotificationId()` |
 | Raw data | `getData()` | `getData()` | `getData()` |

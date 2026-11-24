@@ -27,7 +27,8 @@ $response = $gateway->purchase([
 echo 'successful: ', var_export($response->isSuccessful(), true), ', redirect: ', var_export($response->isRedirect(), true), PHP_EOL;
 echo 'variable symbol: ', $response->getVs(), PHP_EOL;
 
-// The QR code encodes the signed request string; Viamo's QR API renders the same string.
+// The QR code encodes the signed request string; Viamo's QR API renders the same string,
+// passed URL-encoded in the text parameter.
 $query = [];
 parse_str((string) parse_url((string) $response->getQrUrl(), PHP_URL_QUERY), $query);
 echo 'request string: ', $query['text'], PHP_EOL;
@@ -41,8 +42,16 @@ file_put_contents(sys_get_temp_dir() . '/viamo-qr-' . $order['id'] . '.png', $pn
 echo '<img alt="Pay with Viamo" src="data:image/png;base64,', substr((string) $response->getQrData(), 0, 24), '…">', PHP_EOL;
 
 // On a phone, link straight to the app. The app link also carries the return URL (RURL),
-// with every * escaped as %2A, and is signed separately.
+// with every * escaped as %2A, and is signed separately. The request string is URL-encoded.
 echo 'app link: ', $response->getAppLink(), PHP_EOL;
+echo 'app link request string: ', rawurldecode(substr((string) $response->getAppLink(), strlen('viamo://?requestString='))), PHP_EOL;
+
+// * separates the fields, so a value that contains it is refused instead of adding a field.
+try {
+    $gateway->purchase(['amount' => $order['total'], 'currency' => $order['currency'], 'vs' => $order['id'], 'msg' => 'Gift*AM:0.01'])->send();
+} catch (\Omnipay\Common\Exception\InvalidRequestException $e) {
+    echo 'msg "Gift*AM:0.01": ', $e->getMessage(), PHP_EOL;
+}
 
 // Test mode only changes the app link scheme to Viamo's staging app.
 $gateway->setTestMode(true);

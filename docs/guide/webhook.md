@@ -58,14 +58,15 @@ The signed text is `rid`, `vs` and `e2e` (each only when present and not empty),
 | `getVs()` | `payment.vs` as a string, or `null` |
 | `getPaymentId()` | `payment.id` as a string, or `null` |
 | `getNotificationId()` | `notificationId` as a string, or `null` |
+| `getAmount()` | `payment.amount` as the exact text that was signed (`24.90`), or `null` when the signature is not valid |
 | `getMessage()`, `errorMessage()` | Why the notification was rejected, `null` otherwise |
-| `getData()` | `['success' => bool, 'vs' => …, 'payment_id' => …, 'notification_id' => …]` plus `error`; the values keep their JSON types here |
+| `getData()` | `['success' => bool, 'vs' => …, 'payment_id' => …, 'notification_id' => …, 'amount' => …]` plus `error`; `vs`, `payment_id` and `notification_id` keep their JSON types here |
 
-`vs`, `payment_id` and `notification_id` are filled for `Wrong signature` and `Invalid result` too (they are not verified for `Wrong signature`).
+`vs`, `payment_id` and `notification_id` are filled for `Wrong signature` and `Invalid result` too (they are not verified for `Wrong signature`). `amount` is filled only once the signature is verified (`Invalid result` and success).
 
 ## Check the amount
 
-The amount is covered by the signature, but the response has no getter for it. Once `isSuccessful()` is `true`, read it from the JSON you passed in and compare it with your order:
+The amount is covered by the signature. Once `isSuccessful()` is `true`, compare `getAmount()` with your order:
 
 <<< @/../examples/webhook/public/index.php#amount{php}
 

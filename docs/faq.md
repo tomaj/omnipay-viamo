@@ -22,7 +22,7 @@ The return URL (`RURL`) is part of the app link only; the QR code's request stri
 
 ## How do I get the amount from the webhook?
 
-`WebhookResponse` has no getter for it. After `isSuccessful()` is `true`, read `$json['payment']['amount']` from the array you passed in: it is covered by the signature.
+Call `getAmount()` after `isSuccessful()` is `true`. It returns `payment.amount` exactly as Viamo signed it (for example `24.90`), and `null` when the signature is not valid.
 
 ## What do `key1` and `key2` look like?
 

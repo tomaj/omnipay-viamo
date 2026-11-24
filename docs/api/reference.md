@@ -40,9 +40,9 @@ Extends `Omnipay\Common\Message\AbstractRequest` (so `getAmount()`/`setAmount()`
 | `getRurl(): ?string`, `setRurl(?string): static` | Return URL (app link only) |
 | `getDt(): ?string`, `setDt(?string): static` | Stored only; not sent |
 | `getQrEndpoint(): string` | `QR_ENDPOINT` |
-| `getData(): array` | Validates that `bid`, `key1`, `key2` are not `null`; returns `[]` |
+| `getData(): array` | Validates that `bid`, `key1` and `amount` are not `null` or empty and that `vs`, `cs`, `ss` have at most 10 digits; returns `[]`. Throws `InvalidRequestException` |
 | `send(): PurchaseResponse` | `sendData(getData())` |
-| `sendData(mixed $data): PurchaseResponse` | Builds and signs the request string, renders the QR code, returns the response (`$data` is ignored) |
+| `sendData(mixed $data): PurchaseResponse` | Builds and signs the request string, renders the QR code, returns the response (`$data` is ignored). Throws `InvalidRequestException` when a field value contains `*` |
 
 ## Message\PurchaseResponse
 
@@ -51,8 +51,8 @@ Extends `Omnipay\Common\Message\AbstractRequest` (so `getAmount()`/`setAmount()`
 | `isSuccessful(): bool` | Always `true` |
 | `isRedirect(): bool` | Always `false` |
 | `getQrData(): ?string` | Base64 PNG of the QR code |
-| `getQrUrl(): ?string` | Viamo QR API URL |
-| `getAppLink(): ?string` | `viamo://` or `viamo-staging://` link |
+| `getQrUrl(): ?string` | Viamo QR API URL; the request string is URL-encoded in `text` |
+| `getAppLink(): ?string` | `viamo://` or `viamo-staging://` link; the request string is URL-encoded in `requestString` |
 | `getVs(): ?string` | Variable symbol of the request |
 | `getData(): mixed` | `['vs', 'template', 'qr_url', 'qr_data', 'app_link']` |
 
@@ -98,7 +98,8 @@ Also `getBid()`/`setBid()`, `getKey1()`/`setKey1()`, `getKey2()`/`setKey2()`.
 | `getPaymentId(): ?string` | Viamo payment id |
 | `getNotificationId(): ?string` | Notification id |
 | `errorMessage(): ?string`, `getMessage(): ?string` | Reason of a rejection |
-| `getData(): mixed` | `['success' => bool, 'vs', 'payment_id', 'notification_id', 'error']` |
+| `getAmount(): ?string` | Signed `payment.amount` as the text that was signed (e.g. `24.90`); `null` unless the signature is valid |
+| `getData(): mixed` | `['success' => bool, 'vs', 'payment_id', 'notification_id', 'amount', 'error']` |
 
 ## Core\ViamoSign
 
@@ -116,7 +117,7 @@ See [Signatures](../guide/signatures).
 | `Exception\ViamoException` | Interface implemented by every exception of this package |
 | `Exception\InvalidKeyException` | `key1`/`key2` is not 32 hexadecimal characters. Extends Omnipay's `InvalidRequestException`. |
 
-Omnipay's `InvalidRequestException` is thrown for a required parameter that is `null`, a negative amount, or an amount with too many decimals; `Money\Exception\UnknownCurrencyException` for an unknown currency. See [Error handling](../guide/errors).
+Omnipay's `InvalidRequestException` is thrown for a required parameter that is `null` or empty, a payment symbol that is not up to 10 digits, a field value containing `*`, a negative amount, or an amount with too many decimals; `Money\Exception\UnknownCurrencyException` for an unknown currency. See [Error handling](../guide/errors).
 
 ## Inherited from Omnipay
 
