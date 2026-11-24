@@ -11,7 +11,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 * Presentation-level documentation site: own logo and favicon set, hero illustration, payment flow diagram, social card, pages for each operation, error handling, testing, upgrade and security, and five runnable examples in `examples/` (QR checkout, return URL, webhook, a shop paid by a fake Viamo app, signatures checked with `openssl`) that the Examples workflow runs against every pull request ([#25](https://github.com/tomaj/omnipay-viamo/issues/25)).
 * A real test suite: signatures checked against `openssl` CLI values, every operation with valid, tampered and malformed input; 100% statement coverage and mutation testing ([#17](https://github.com/tomaj/omnipay-viamo/issues/17)).
 * `LICENSE.md` (MIT), `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` and a `.gitattributes` that keeps tests and tooling out of the Composer archive ([#12](https://github.com/tomaj/omnipay-viamo/issues/12)).
-* `WebhookResponse::getAmount()` returns the signed `payment.amount` (as the text that was signed), set only when the signature is valid; docs and examples use it instead of reading the JSON ([#PR](https://github.com/tomaj/omnipay-viamo/pull/PR)).
+* `WebhookResponse::getAmount()` returns the signed `payment.amount` (as the text that was signed), set only when the signature is valid; docs and examples use it instead of reading the JSON ([#29](https://github.com/tomaj/omnipay-viamo/pull/29)).
 * `PurchaseResponse` has `getQrData()`, `getQrUrl()` and `getAppLink()`; `CompletePurchaseResponse::getMessage()` and `WebhookResponse::getMessage()` return the rejection reason; `send()` of each request is typed with its concrete response class ([#16](https://github.com/tomaj/omnipay-viamo/issues/16)).
 
 ### Changed
@@ -34,7 +34,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ### Security
 
-* **Security**: `purchase()` refuses a field value that contains `*`, the field separator of the request string, with `InvalidRequestException` instead of signing it (only `rurl` is escaped, as before), and requires `vs`, `cs` and `ss` to be numbers of at most 10 digits. **BREAKING CHANGE**: such values were accepted in 4.x; strip `*` from messages built from customer input ([#PR](https://github.com/tomaj/omnipay-viamo/pull/PR)).
+* **Security**: `purchase()` refuses a field value that contains `*`, the field separator of the request string, with `InvalidRequestException` instead of signing it (only `rurl` is escaped, as before), and requires `vs`, `cs` and `ss` to be numbers of at most 10 digits. **BREAKING CHANGE**: such values were accepted in 4.x; strip `*` from messages built from customer input ([#29](https://github.com/tomaj/omnipay-viamo/pull/29)).
 * **Security**: The return URL and webhook signatures are compared with `hash_equals()` in constant time instead of `!=`/`!==`; a non-string webhook signature is rejected ([#16](https://github.com/tomaj/omnipay-viamo/issues/16)).
 
 ## [4.0.0] - 2026-03-27
