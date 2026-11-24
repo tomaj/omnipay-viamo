@@ -3,6 +3,8 @@
 - Every `<<< @/...` snippet import must point at an existing file.
 - Every file in docs/snippets/ must be imported by at least one page
   (tests/DocsSnippetsTest.php runs each of them against the current code).
+- Every example in examples/ has a page docs/examples/<name>.md that includes its
+  expected-output.txt (the Examples workflow checks that output).
 - A fenced ```php block may only show a signature or a one-liner (at most 3 lines);
   anything longer belongs in a snippet file.
 """
@@ -26,6 +28,14 @@ for page in sorted(docs.rglob("*.md")):
         lines = [line for line in block.splitlines() if line.strip()]
         if len(lines) > 3:
             errors.append(f"{page.relative_to(docs)}: a {len(lines)}-line PHP block, move it to docs/snippets/ and import it")
+
+examples = docs.parent / "examples"
+for example in sorted(p for p in examples.iterdir() if p.is_dir() and p.name != "ci"):
+    page = docs / "examples" / f"{example.name}.md"
+    if not page.is_file():
+        errors.append(f"examples/{example.name}/ has no page docs/examples/{example.name}.md")
+    elif f"../examples/{example.name}/expected-output.txt" not in imported:
+        errors.append(f"docs/examples/{example.name}.md does not include its expected-output.txt")
 
 for snippet in sorted((docs / "snippets").glob("*.php")):
     if snippet.relative_to(docs).as_posix() not in imported:

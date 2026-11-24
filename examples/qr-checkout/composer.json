@@ -1,0 +1,8 @@
+{
+    "require": {
+        "php": ">=8.4",
+        "tomaj/omnipay-viamo": "dev-master"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

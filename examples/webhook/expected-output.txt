@@ -1,0 +1,20 @@
+paid                       200  {"result":"paid"}
+same notification again    200  {"result":"already paid"}
+payment failed             200  {"result":"payment failed"}
+forged: amount changed     400  {"result":"rejected","reason":"Wrong signature"}
+signed, wrong amount       422  {"result":"rejected","reason":"amount 1.20 does not match order 2026000125 (120.00)"}
+signed, unknown order      404  {"result":"rejected","reason":"unknown order 9999"}
+no signature               400  {"result":"rejected","reason":"Missing signature"}
+not JSON                   400  {"result":"rejected","reason":"the body is not a JSON object"}
+
+shop log:
+Viamo webhook rejected (400): Wrong signature
+Viamo webhook rejected (422): amount 1.20 does not match order 2026000125 (120.00)
+Viamo webhook rejected (404): unknown order 9999
+Viamo webhook rejected (400): Missing signature
+Viamo webhook rejected (400): the body is not a JSON object
+
+orders:
+  2026000123 24.90 EUR paid (by webhook)
+  2026000124 9.90 EUR failed
+  2026000125 120.00 EUR new

@@ -1,6 +1,10 @@
+---
+description: 'Every public class and method of omnipay-viamo - Gateway, the requests and responses, ViamoSign and the exceptions.'
+---
+
 # API reference
 
-All classes are `final`. Namespace `Omnipay\Viamo`.
+All classes are `final`. Namespace `Omnipay\Viamo`. `Core\CredentialsParameters` and `Core\Str` are `@internal`: not part of the public API.
 
 ## Gateway
 
@@ -14,9 +18,9 @@ All classes are `final`. Namespace `Omnipay\Viamo`.
 | `getKey1(): ?string`, `setKey1(?string): static` | Key for the payment request and the return URL |
 | `getKey2(): ?string`, `setKey2(?string): static` | Key for the webhook |
 | `getTestMode(): bool`, `setTestMode(bool)` | Inherited; see [Test mode](../guide/test-mode) |
-| `purchase(array $parameters = []): PurchaseRequest` | See [purchase()](../guide/operations#purchase) |
-| `completePurchase(array $parameters = []): CompletePurchaseRequest` | See [completePurchase()](../guide/operations#completepurchase) |
-| `webhook(array $parameters = []): WebhookRequest` | See [webhook()](../guide/operations#webhook) |
+| `purchase(array $parameters = []): PurchaseRequest` | See [purchase()](../guide/purchase) |
+| `completePurchase(array $parameters = []): CompletePurchaseRequest` | See [completePurchase()](../guide/return-url) |
+| `webhook(array $parameters = []): WebhookRequest` | See [webhook()](../guide/webhook) |
 
 Every request has the same `getBid()`/`setBid()`, `getKey1()`/`setKey1()`, `getKey2()`/`setKey2()` accessors and inherits the gateway's values.
 
@@ -36,8 +40,9 @@ Extends `Omnipay\Common\Message\AbstractRequest` (so `getAmount()`/`setAmount()`
 | `getRurl(): ?string`, `setRurl(?string): static` | Return URL (app link only) |
 | `getDt(): ?string`, `setDt(?string): static` | Stored only; not sent |
 | `getQrEndpoint(): string` | `QR_ENDPOINT` |
-| `getData(): array` | Validates `bid`, `key1`, `key2`; returns `[]` |
-| `send(): PurchaseResponse` | |
+| `getData(): array` | Validates that `bid`, `key1`, `key2` are not `null`; returns `[]` |
+| `send(): PurchaseResponse` | `sendData(getData())` |
+| `sendData(mixed $data): PurchaseResponse` | Builds and signs the request string, renders the QR code, returns the response (`$data` is ignored) |
 
 ## Message\PurchaseResponse
 
@@ -55,8 +60,11 @@ Extends `Omnipay\Common\Message\AbstractRequest` (so `getAmount()`/`setAmount()`
 
 | Method | Description |
 |---|---|
-| `getData(): array` | Parses and verifies `responseString` from the gateway's HTTP request query: `['RES' => string, 'VS' => string, 'message' => string]` (`VS`/`message` when present) |
-| `send(): CompletePurchaseResponse` | |
+| `getData(): array` | Parses and verifies `responseString` from the gateway's HTTP request query: `['RES' => string, 'VS' => string, 'message' => string]` (`VS`/`message` when present). No `validate()`; throws `InvalidKeyException` for an invalid `key1` once `BID` matches |
+| `send(): CompletePurchaseResponse` | `sendData(getData())` |
+| `sendData(mixed $data): CompletePurchaseResponse` | Wraps `$data` in the response |
+
+Also `getBid()`/`setBid()`, `getKey1()`/`setKey1()`, `getKey2()`/`setKey2()`.
 
 ## Message\CompletePurchaseResponse
 
@@ -66,14 +74,19 @@ Extends `Omnipay\Common\Message\AbstractRequest` (so `getAmount()`/`setAmount()`
 | `getRes(): ?string` | `OK`, `FAIL` or `ERROR` |
 | `getVs(): ?string` | Variable symbol |
 | `getMessage(): ?string` | Reason of an `ERROR` |
+| `isRedirect(): bool` | `false` (inherited) |
+| `getData(): mixed` | `['RES' => …, 'VS' => …, 'message' => …]` |
 
 ## Message\WebhookRequest
 
 | Method | Description |
 |---|---|
 | `getJson(): ?array`, `setJson(?array): static` | The decoded notification body |
-| `getData(): array` | Validates `bid`, `key2`, `json`; returns `[]` |
-| `send(): WebhookResponse` | Verifies the notification |
+| `getData(): array` | Validates that `bid`, `key2`, `json` are not `null`; returns `[]` |
+| `send(): WebhookResponse` | `sendData(getData())` |
+| `sendData(mixed $data): WebhookResponse` | Verifies the notification (`$data` is ignored); see [webhook()](../guide/webhook#what-is-checked-in-order) |
+
+Also `getBid()`/`setBid()`, `getKey1()`/`setKey1()`, `getKey2()`/`setKey2()`.
 
 ## Message\WebhookResponse
 
@@ -85,6 +98,7 @@ Extends `Omnipay\Common\Message\AbstractRequest` (so `getAmount()`/`setAmount()`
 | `getPaymentId(): ?string` | Viamo payment id |
 | `getNotificationId(): ?string` | Notification id |
 | `errorMessage(): ?string`, `getMessage(): ?string` | Reason of a rejection |
+| `getData(): mixed` | `['success' => bool, 'vs', 'payment_id', 'notification_id', 'error']` |
 
 ## Core\ViamoSign
 
@@ -102,4 +116,8 @@ See [Signatures](../guide/signatures).
 | `Exception\ViamoException` | Interface implemented by every exception of this package |
 | `Exception\InvalidKeyException` | `key1`/`key2` is not 32 hexadecimal characters. Extends Omnipay's `InvalidRequestException`. |
 
-Omnipay's `InvalidRequestException` is thrown for a missing required parameter.
+Omnipay's `InvalidRequestException` is thrown for a required parameter that is `null`, a negative amount, or an amount with too many decimals; `Money\Exception\UnknownCurrencyException` for an unknown currency. See [Error handling](../guide/errors).
+
+## Inherited from Omnipay
+
+The gateway inherits `initialize(array $parameters = [])`, `getParameters()`, `getShortName()`, `getTestMode()`/`setTestMode()`, `getCurrency()`/`setCurrency()` from `AbstractGateway`. The requests inherit `initialize()`, `getParameters()`, `getAmount()`/`setAmount()`, `getCurrency()`/`setCurrency()`, `getTestMode()`/`setTestMode()`, `getResponse()` and `validate()` from `AbstractRequest`. The responses inherit `getRequest()`, `isCancelled()`, `getCode()` and `getTransactionReference()` (both `null`) from `AbstractResponse`. See the [Omnipay documentation](https://omnipay.thephpleague.com/).

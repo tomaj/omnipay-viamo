@@ -1,0 +1,18 @@
+paid                         200  Thank you! Order 2026000123 is paid.
+paid again (reload)          200  Thank you! Order 2026000123 is paid.
+declined                     200  The payment of order 2026000124 did not go through. You can try again.
+forged: RES changed to OK    400  We could not verify the payment result. If you paid, the order is updated as soon as Viamo notifies us.
+forged: another merchant     400  We could not verify the payment result. If you paid, the order is updated as soon as Viamo notifies us.
+signed, unknown order        400  We could not verify the payment result. If you paid, the order is updated as soon as Viamo notifies us.
+no responseString            400  We could not verify the payment result. If you paid, the order is updated as soon as Viamo notifies us.
+
+shop log:
+Viamo return URL rejected: Wrong sign
+Viamo return URL rejected: Wrong BID
+Viamo return URL rejected: unknown order 9999
+Viamo return URL rejected: Missing responseString
+
+orders:
+  2026000123 24.90 EUR paid (by return URL)
+  2026000124 9.90 EUR failed
+  2026000125 120.00 EUR new

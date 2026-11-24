@@ -50,6 +50,18 @@ npm run docs:dev
 npm run docs:links
 ```
 
+Short PHP blocks written directly in `README.md`, `UPGRADE-5.0.md` or a docs page run in `tests/InlineSnippetsTest.php`; put `<!-- snippet: skip -->` before a block that on purpose no longer works (the 4.x side of an upgrade step).
+
+The runnable recipes live in `examples/<name>/` (`e2e.sh` and `expected-output.txt`), and their docs pages include the code with `<<< @/../examples/<name>/...`. The Examples workflow runs each one against the pull request's code; run one locally the same way:
+
+```bash
+examples/ci/recipe.sh shop
+```
+
+When a change alters an example's output on purpose, update its `expected-output.txt` in the same pull request.
+
+The logo, favicon, hero illustration, feature icons, payment flow diagram and social card are generated: edit `docs/scripts/art.py`, then run `npm run art` in `docs/` (Python 3 and Google Chrome; set `CHROME_PATH` if Chrome is elsewhere) and commit the generated files.
+
 Maintainers publish releases by pushing a version tag; see [RELEASING.md](RELEASING.md).
 
 By contributing, you agree that your contributions are licensed under the MIT License.

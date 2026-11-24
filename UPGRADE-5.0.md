@@ -10,9 +10,13 @@ Every method has native parameter and return types, and the gateway, requests, r
 
 - Parameter setters accept `?string` and return `static`. Passing parameters through `initialize()`, `purchase([...])`, `completePurchase([...])` or `webhook([...])` still converts integers to strings. Calling a setter directly with an `int` from a file with `declare(strict_types=1)` now throws a `TypeError`; `setRpt()` accepts `int|string|null`.
 
+  <!-- snippet: skip -->
   ```php
-  // 4.x
+  // 4.x: a TypeError in 5.0 under strict_types
   $request->setVs(2026000123);
+  ```
+
+  ```php
   // 5.0
   $request->setVs('2026000123');
   ```
@@ -25,11 +29,19 @@ Every method has native parameter and return types, and the gateway, requests, r
 
 `PurchaseResponse::getVs()`, `WebhookResponse::getVs()`, `getPaymentId()` and `getNotificationId()` returned `false` when the value was missing; they return `null` now. Values are returned as strings (a numeric payment id from the webhook JSON was returned as `int`).
 
+<!-- snippet: skip -->
 ```php
 // 4.x
-if ($response->getPaymentId() !== false) { ... }
+if ($response->getPaymentId() !== false) {
+    // ...
+}
+```
+
+```php
 // 5.0
-if ($response->getPaymentId() !== null) { ... }
+if ($response->getPaymentId() !== null) {
+    // ...
+}
 ```
 
 ## Invalid keys throw
@@ -57,9 +69,13 @@ $result = $gateway->completePurchase()->send();
 
 The variable symbol in `CompletePurchaseResponse::getData()` is under the key `VS` (was `vs`), the same key `getVs()` reads; `getVs()` returned `null` in 4.x. Use the getter:
 
+<!-- snippet: skip -->
 ```php
 // 4.x
 $vs = $result->getData()['vs'];
+```
+
+```php
 // 5.0
 $vs = $result->getVs();
 ```
