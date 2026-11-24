@@ -2,7 +2,7 @@
 """Generate the hand-made SVG artwork of the documentation site (light and dark variants).
 
     python3 docs/scripts/art.py           # writes docs/public/{logo,illustrations,icons,diagrams} (English and -sk)
-    node docs/scripts/og-image.mjs        # then rasterizes og.png and the PNG/ICO favicons
+    node docs/scripts/og-image.mjs        # then rasterizes og.png, og-sk.png and the PNG/ICO favicons
 
 The omnipay-* packages share one visual family: a 60 x 60 rounded square (rx 14) in the bank's colour with
 a white glyph, flat shapes, system fonts. omnipay-viamo is the green one; its glyph is a "V"
@@ -309,10 +309,20 @@ def flow(theme: str, w: dict) -> str:
 
 # --- social card (rasterized to og.png by og-image.mjs) -----------------------------------
 
-def og() -> str:
+# The social card text per language: og.svg (English) and og-sk.svg (pages under docs/sk/).
+OG = {
+    "": {"tagline": "Viamo mobile payments for PHP", "line1": "Signed QR codes and app links,",
+         "line2": "verified return URLs and webhooks.", "pay": "Pay 24.90 €"},
+    "-sk": {"tagline": "Mobilné platby Viamo pre PHP", "line1": "Podpísané QR kódy a odkazy do aplikácie,",
+            "line2": "overené návratové URL a webhooky.", "pay": "Zaplatiť 24,90 €"},
+}
+
+
+def og(lang: str = "") -> str:
     t = THEMES["dark"]
+    w = OG[lang]
     return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img">
-  <title>Omnipay Viamo: Viamo mobile payments for PHP</title>
+  <title>Omnipay Viamo: {w['tagline']}</title>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
       <stop stop-color="#0b1f14"/>
@@ -324,9 +334,9 @@ def og() -> str:
   {mark(t, 80, 84, 112)}
   <g font-family="{FONT}">
     <text x="80" y="300" font-size="76" font-weight="800" fill="#ffffff">Omnipay Viamo</text>
-    <text x="80" y="362" font-size="32" fill="#b9e8cb">Viamo mobile payments for PHP</text>
-    <text x="80" y="420" font-size="25" fill="#8fbfa2">Signed QR codes and app links,</text>
-    <text x="80" y="456" font-size="25" fill="#8fbfa2">verified return URLs and webhooks.</text>
+    <text x="80" y="362" font-size="32" fill="#b9e8cb">{w['tagline']}</text>
+    <text x="80" y="420" font-size="25" fill="#8fbfa2">{w['line1']}</text>
+    <text x="80" y="456" font-size="25" fill="#8fbfa2">{w['line2']}</text>
     <rect x="80" y="506" width="580" height="56" rx="14" fill="#06140c" stroke="#245a3a"/>
     <text x="104" y="542" font-size="22" fill="#4ade80" font-family="{MONO}">composer require tomaj/omnipay-viamo</text>
   </g>
@@ -334,7 +344,7 @@ def og() -> str:
   <rect x="804" y="134" width="272" height="392" rx="26" fill="#ffffff"/>
   {qr(850, 200, 180, '#0b1f14')}
   <rect x="850" y="420" width="180" height="48" rx="24" fill="#0f9f55"/>
-  <text x="940" y="451" font-size="20" font-weight="700" fill="#ffffff" text-anchor="middle" font-family="{FONT}">Pay 24.90 €</text>
+  <text x="940" y="451" font-size="20" font-weight="700" fill="#ffffff" text-anchor="middle" font-family="{FONT}">{w['pay']}</text>
 </svg>"""
 
 
@@ -366,7 +376,7 @@ STRINGS = {
         "flow": {
             "title": "Priebeh platby Viamo: purchase, naskenovanie a potvrdenie, notifikácia (webhook), návratová URL",
             "lanes": [("Zákazník", "prehliadač alebo mobil"), ("Váš e-shop", "omnipay-viamo"), ("Aplikácia Viamo", "v mobile"), ("Viamo", "server")],
-            "checkout": "objednávka", "signs": "podpíše požiadavku, key1", "qrOrLink": "QR kód alebo odkaz do aplikácie",
+            "checkout": "objednávka", "signs": "podpíše požiadavku, key1", "qrOrLink": "QR kód alebo odkaz",
             "scan": "naskenuje QR kód alebo otvorí odkaz", "confirm": "overí SIG, zákazník potvrdí",
             "post": "POST webhook: JSON + podpis", "verifiesKey2": "overí key2, result OK", "verifiesKey1": "overí BID a key1",
             "footer": "2 a 3 prídu v ľubovoľnom poradí alebo len jedna z nich: nájdite objednávku podľa VS, overte sumu, označte ju ako zaplatenú raz.",
@@ -386,7 +396,8 @@ def main() -> None:
             write(f"diagrams/payment-flow{lang}-{theme}.svg", flow(theme, words["flow"]))
         for name in ICONS:
             write(f"icons/{name}{suffix}.svg", icon(name, theme))
-    write("og.svg", og())
+    for lang in OG:
+        write(f"og{lang}.svg", og(lang))
 
 
 if __name__ == "__main__":
