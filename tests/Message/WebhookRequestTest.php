@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Omnipay\Viamo\Tests\Message;
 
 use Omnipay\Common\Exception\InvalidRequestException;
+use Omnipay\Viamo\Gateway;
 use Omnipay\Viamo\Message\WebhookResponse;
 use Omnipay\Viamo\Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -43,9 +44,10 @@ final class WebhookRequestTest extends TestCase
         self::assertSame('777', $response->getVs());
         self::assertSame('555', $response->getPaymentId());
         self::assertSame('N1', $response->getNotificationId());
+        self::assertSame('10.00', $response->getAmount());
         self::assertNull($response->errorMessage());
         self::assertNull($response->getMessage());
-        self::assertSame(['success' => true, 'vs' => '777', 'payment_id' => 555, 'notification_id' => 'N1'], $response->getData());
+        self::assertSame(['success' => true, 'vs' => '777', 'payment_id' => 555, 'notification_id' => 'N1', 'amount' => '10.00'], $response->getData());
     }
 
     public function testLowercaseSignatureIsAccepted(): void
@@ -91,7 +93,8 @@ final class WebhookRequestTest extends TestCase
         ]);
 
         self::assertFalse($response->isSuccessful());
-        self::assertSame(['success' => false, 'error' => 'Invalid result', 'vs' => '777', 'payment_id' => '556', 'notification_id' => 9], $response->getData());
+        self::assertSame(['success' => false, 'error' => 'Invalid result', 'vs' => '777', 'payment_id' => '556', 'notification_id' => 9, 'amount' => '1.5'], $response->getData());
+        self::assertSame('1.5', $response->getAmount());
         self::assertSame('Invalid result', $response->errorMessage());
         self::assertSame('Invalid result', $response->getMessage());
         self::assertSame('777', $response->getVs());
@@ -121,6 +124,7 @@ final class WebhookRequestTest extends TestCase
 
         self::assertFalse($response->isSuccessful());
         self::assertSame(['success' => false, 'error' => 'Wrong signature', 'vs' => '777', 'payment_id' => 555, 'notification_id' => 'N1'], $response->getData());
+        self::assertNull($response->getAmount());
     }
 
     /**
@@ -176,6 +180,7 @@ final class WebhookRequestTest extends TestCase
         self::assertNull($response->getVs());
         self::assertNull($response->getPaymentId());
         self::assertNull($response->getNotificationId());
+        self::assertNull($response->getAmount());
     }
 
     public function testJsonIsRequired(): void
@@ -183,14 +188,38 @@ final class WebhookRequestTest extends TestCase
         self::assertThrows(InvalidRequestException::class, 'The json parameter is required', fn(): WebhookResponse => $this->webhook(null));
     }
 
-    public function testKey2IsRequired(): void
+    /**
+     * @return iterable<string, array{string, ?string}>
+     */
+    public static function requiredParameters(): iterable
     {
-        self::assertThrows(InvalidRequestException::class, 'The key2 parameter is required', fn(): WebhookResponse => $this->gateway()->webhook(['json' => $this->notification(), 'key2' => null])->send());
+        foreach (['bid', 'key2'] as $parameter) {
+            yield "{$parameter} null" => [$parameter, null];
+            yield "{$parameter} empty" => [$parameter, ''];
+        }
     }
 
-    public function testBidIsRequired(): void
+    #[DataProvider('requiredParameters')]
+    public function testRequiredParameters(string $parameter, ?string $value): void
     {
-        self::assertThrows(InvalidRequestException::class, 'The bid parameter is required', fn(): WebhookResponse => $this->gateway()->webhook(['json' => $this->notification(), 'bid' => null])->send());
+        self::assertThrows(
+            InvalidRequestException::class,
+            "The {$parameter} parameter is required",
+            fn(): WebhookResponse => $this->gateway()->webhook(['json' => $this->notification(), $parameter => $value])->send(),
+        );
+    }
+
+    public function testThroughTheGatewayDefaultsAnEmptyBidIsRejected(): void
+    {
+        $gateway = new Gateway();
+        $gateway->initialize(['key2' => self::KEY2]);
+
+        self::assertThrows(InvalidRequestException::class, 'The bid parameter is required', static fn(): WebhookResponse => $gateway->webhook(['json' => []])->send());
+    }
+
+    public function testKey1IsNotRequired(): void
+    {
+        self::assertTrue($this->gateway()->webhook(['json' => $this->notification(), 'key1' => null])->send()->isSuccessful());
     }
 
     public function testJsonAccessors(): void

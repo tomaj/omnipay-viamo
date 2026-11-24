@@ -11,7 +11,8 @@ There are two kinds of failure: **exceptions** for a misconfigured gateway or in
 | Exception | Thrown by | When |
 |---|---|---|
 | `Omnipay\Viamo\Exception\InvalidKeyException` | `purchase()->send()`, `completePurchase()->send()`, `webhook()->send()`, `ViamoSign::sign()`/`verify()` | `key1` or `key2` is not 32 hexadecimal characters (also when it is empty) |
-| `Omnipay\Common\Exception\InvalidRequestException` | `purchase()->send()`, `webhook()->send()` | A required parameter is `null`: `bid`, `key1`, `key2` for `purchase()`; `bid`, `key2`, `json` for `webhook()` |
+| `Omnipay\Common\Exception\InvalidRequestException` | `purchase()->send()`, `webhook()->send()` | A required parameter is `null` or empty: `bid`, `key1`, `amount` for `purchase()`; `bid`, `key2` (and a `null` `json`) for `webhook()`. Message: `The bid parameter is required` |
+| `Omnipay\Common\Exception\InvalidRequestException` | `purchase()->send()` | `vs`, `cs` or `ss` is not a number of at most 10 digits (`The vs parameter must be a number of at most 10 digits`), or a field value contains `*`, the field separator (`The msg parameter must not contain "*", the field separator of the Viamo request string`) |
 | `Omnipay\Common\Exception\InvalidRequestException` | `purchase()->send()` | `amount` is negative or has more decimals than the currency allows (from Omnipay's amount formatting) |
 | `Money\Exception\UnknownCurrencyException` | `purchase()->send()` | `currency` is not an ISO 4217 code |
 | `TypeError` | setters | A value of the wrong type, for example `setVs(123)` under `strict_types` (pass strings; arrays passed to `purchase([...])` are converted) |

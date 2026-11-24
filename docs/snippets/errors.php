@@ -15,6 +15,7 @@ try {
     // Omnipay\Viamo\Exception\InvalidKeyException: key1/key2 are not 32 hex characters
     error_log($e->getMessage());
 } catch (InvalidRequestException $e) {
-    // a required parameter (bid, key1, key2) is missing
+    // a required parameter (bid, key1, amount) is missing or empty, a payment symbol is not
+    // up to 10 digits, or a value contains the field separator *
     error_log($e->getMessage());
 }

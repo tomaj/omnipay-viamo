@@ -49,6 +49,15 @@ final class WebhookResponse extends AbstractResponse
         return $this->getValue('vs');
     }
 
+    /**
+     * The paid amount as Viamo sent it (e.g. `24.90`). It is covered by the signature and set only when the
+     * signature is valid (null for `Wrong signature`). Compare it with your order total before marking it paid.
+     */
+    public function getAmount(): ?string
+    {
+        return $this->getValue('amount');
+    }
+
     public function getPaymentId(): ?string
     {
         return $this->getValue('payment_id');

@@ -109,6 +109,7 @@ final class InlineSnippetsTest extends TestCase
             \$parameters = ['amount' => '10.00', 'currency' => 'EUR', 'vs' => '777'];
             \$request = \$gateway->purchase(\$parameters);
             \$response = \$gateway->webhook(['json' => \$json])->send();
+            \$notification = \$response;
             \$result = \$gateway->completePurchase()->send();
             function markOrderPaid(?string \$vs): void {}
             PHP;

@@ -81,3 +81,61 @@ $vs = $result->getVs();
 ```
 
 A missing or malformed `responseString` gives a failed response (`getRes() === 'ERROR'`, `getMessage()` says why) instead of PHP warnings.
+
+## Required parameters are checked for empty values
+
+`purchase()` throws `Omnipay\Common\Exception\InvalidRequestException` when `bid`, `key1` or `amount` is `null` or an empty string. 4.x signed `BID:` or `AM:` with an empty value, which Viamo cannot accept; a gateway created with `Omnipay::create()` starts with `bid` set to `''`. `purchase()` no longer requires `key2`. `webhook()` throws for an empty `bid` or `key2`.
+
+```php
+$gateway = \Omnipay\Omnipay::create('Viamo');
+$gateway->initialize(['bid' => '42', 'key1' => '000102030405060708090a0b0c0d0e0f']);
+
+$response = $gateway->purchase(['amount' => '24.90', 'currency' => 'EUR', 'vs' => '2026000123'])->send();
+```
+
+## Payment symbols and `*` in values
+
+`vs`, `cs` and `ss` must be numbers of at most 10 digits; other values throw `InvalidRequestException` ("The vs parameter must be a number of at most 10 digits"). A field value that contains `*`, the separator of the request string's fields, throws `InvalidRequestException` instead of being signed; only `rurl` is escaped (`*` becomes `%2A`), as before. If `msg` is built from text a customer typed, remove `*` first:
+
+<!-- snippet: skip -->
+```php
+// 4.x: signed as is
+$gateway->purchase(['amount' => '24.90', 'vs' => 'A-123', 'msg' => $customerNote]);
+```
+
+```php
+// 5.0
+$customerNote = 'Gift *wrapped*';
+$gateway = \Omnipay\Omnipay::create('Viamo');
+$gateway->initialize(['bid' => '42', 'key1' => '000102030405060708090a0b0c0d0e0f']);
+
+$response = $gateway->purchase(['amount' => '24.90', 'vs' => '123', 'msg' => str_replace('*', '', $customerNote)])->send();
+```
+
+## URL-encoded QR API URL and app link
+
+`PurchaseResponse::getQrUrl()` and `getAppLink()` URL-encode the request string (`rawurlencode()`): `?text=QP%3A1.0%2ABID%3A42…` instead of `?text=QP:1.0*BID:42…`. Links you print as they are need no change. If you take the request string out of these URLs yourself, decode it:
+
+```php
+$gateway = \Omnipay\Omnipay::create('Viamo');
+$gateway->initialize(['bid' => '42', 'key1' => '000102030405060708090a0b0c0d0e0f']);
+$response = $gateway->purchase(['amount' => '24.90'])->send();
+
+// 4.x: substr($response->getAppLink(), strlen('viamo://?requestString='))
+$requestString = rawurldecode(substr((string) $response->getAppLink(), strlen('viamo://?requestString=')));
+```
+
+## Webhook amount
+
+`WebhookResponse::getAmount()` returns the signed `payment.amount`; you no longer need to read it from the JSON:
+
+<!-- snippet: skip -->
+```php
+// 4.x
+$amount = $json['payment']['amount'];
+```
+
+```php
+// 5.0
+$amount = $notification->getAmount();
+```

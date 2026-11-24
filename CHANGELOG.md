@@ -11,6 +11,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 * Presentation-level documentation site: own logo and favicon set, hero illustration, payment flow diagram, social card, pages for each operation, error handling, testing, upgrade and security, and five runnable examples in `examples/` (QR checkout, return URL, webhook, a shop paid by a fake Viamo app, signatures checked with `openssl`) that the Examples workflow runs against every pull request ([#25](https://github.com/tomaj/omnipay-viamo/issues/25)).
 * A real test suite: signatures checked against `openssl` CLI values, every operation with valid, tampered and malformed input; 100% statement coverage and mutation testing ([#17](https://github.com/tomaj/omnipay-viamo/issues/17)).
 * `LICENSE.md` (MIT), `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` and a `.gitattributes` that keeps tests and tooling out of the Composer archive ([#12](https://github.com/tomaj/omnipay-viamo/issues/12)).
+* `WebhookResponse::getAmount()` returns the signed `payment.amount` (as the text that was signed), set only when the signature is valid; docs and examples use it instead of reading the JSON ([#PR](https://github.com/tomaj/omnipay-viamo/pull/PR)).
 * `PurchaseResponse` has `getQrData()`, `getQrUrl()` and `getAppLink()`; `CompletePurchaseResponse::getMessage()` and `WebhookResponse::getMessage()` return the rejection reason; `send()` of each request is typed with its concrete response class ([#16](https://github.com/tomaj/omnipay-viamo/issues/16)).
 
 ### Changed
@@ -22,6 +23,8 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 * **BREAKING CHANGE**: `PurchaseResponse::getVs()`, `WebhookResponse::getVs()`, `getPaymentId()` and `getNotificationId()` return `null` instead of `false` for a missing value, and return strings ([#16](https://github.com/tomaj/omnipay-viamo/issues/16)).
 * **BREAKING CHANGE**: An invalid `key1`/`key2` (not 32 hexadecimal characters) throws `Omnipay\Viamo\Exception\InvalidKeyException` instead of signing with a zero-padded or truncated key. All package exceptions implement `Omnipay\Viamo\Exception\ViamoException` ([#16](https://github.com/tomaj/omnipay-viamo/issues/16)).
 * **BREAKING CHANGE**: `completePurchase()` reads `responseString` from the gateway's HTTP request (`Request::createFromGlobals()` by default) instead of `$_GET` ([#16](https://github.com/tomaj/omnipay-viamo/issues/16)).
+* **BREAKING CHANGE**: `purchase()` throws `InvalidRequestException` when `bid`, `key1` or `amount` is missing or an empty string (a gateway created with `Omnipay::create()` defaults `bid` to `''`), and no longer requires `key2`. `webhook()` throws for an empty `bid` or `key2`. Configure `bid` and pass `amount` ([#27](https://github.com/tomaj/omnipay-viamo/issues/27)).
+* **BREAKING CHANGE**: `getQrUrl()` and `getAppLink()` URL-encode the request string (`rawurlencode()`), so a space, `&`, `#` or `%` in `msg` or `rurl` no longer breaks the URL; decoding the parameter gives the exact signed string, and the signatures are unchanged. Code that parsed the raw string out of these URLs must decode it ([#28](https://github.com/tomaj/omnipay-viamo/issues/28)).
 * `completePurchase()` compares the returned `BID` strictly (`!==`) instead of `!=`, so numeric-looking values no longer match loosely.
 
 ### Fixed
@@ -31,6 +34,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ### Security
 
+* **Security**: `purchase()` refuses a field value that contains `*`, the field separator of the request string, with `InvalidRequestException` instead of signing it (only `rurl` is escaped, as before), and requires `vs`, `cs` and `ss` to be numbers of at most 10 digits. **BREAKING CHANGE**: such values were accepted in 4.x; strip `*` from messages built from customer input ([#PR](https://github.com/tomaj/omnipay-viamo/pull/PR)).
 * **Security**: The return URL and webhook signatures are compared with `hash_equals()` in constant time instead of `!=`/`!==`; a non-string webhook signature is rejected ([#16](https://github.com/tomaj/omnipay-viamo/issues/16)).
 
 ## [4.0.0] - 2026-03-27
