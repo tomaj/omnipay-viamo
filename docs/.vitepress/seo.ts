@@ -8,6 +8,8 @@ export const siteUrl = 'https://tomaj.github.io/omnipay-viamo/'
 export const description = 'Viamo mobile payments gateway for the Omnipay PHP payment processing library: signed QR codes and app links, verified return URLs and webhooks.'
 export const descriptionSk = 'Brána mobilných platieb Viamo pre PHP knižnicu Omnipay: podpísané QR kódy a odkazy do aplikácie, overené návratové URL a notifikácie (webhooky).'
 const ogImage = `${siteUrl}og.png`
+// Slovak pages get the social card with the Slovak tagline.
+const ogImageSk = `${siteUrl}og-sk.png`
 const siteName = 'Omnipay Viamo'
 const repoUrl = 'https://github.com/tomaj/omnipay-viamo'
 const author = { '@type': 'Person', '@id': `${siteUrl}#tomaj`, name: 'Tomas Majer', url: 'https://github.com/tomaj' }
@@ -77,6 +79,7 @@ export function seoHead(page: PageData, srcDir: string): HeadConfig[] {
   const sk = locale.prefix === 'sk/'
   const siteDescription = sk ? descriptionSk : description
   const isHome = page.frontmatter.layout === 'home'
+  const image = sk ? ogImageSk : ogImage
   const homeTitle = sk ? 'Omnipay Viamo - mobilné platby Viamo pre PHP' : 'Omnipay Viamo - Viamo mobile payments for PHP'
   const title = isHome ? homeTitle : `${page.title} | ${siteName}`
   const pageDescription = page.description || page.frontmatter.description || siteDescription
@@ -91,14 +94,14 @@ export function seoHead(page: PageData, srcDir: string): HeadConfig[] {
     ['meta', { property: 'og:title', content: title }],
     ['meta', { property: 'og:description', content: pageDescription }],
     ['meta', { property: 'og:url', content: url }],
-    ['meta', { property: 'og:image', content: ogImage }],
+    ['meta', { property: 'og:image', content: image }],
     ['meta', { property: 'og:image:width', content: '1200' }],
     ['meta', { property: 'og:image:height', content: '630' }],
     ['meta', { property: 'og:image:alt', content: sk ? 'Omnipay Viamo: mobilné platby Viamo pre PHP' : 'Omnipay Viamo: Viamo mobile payments for PHP' }],
     ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
     ['meta', { name: 'twitter:title', content: title }],
     ['meta', { name: 'twitter:description', content: pageDescription }],
-    ['meta', { name: 'twitter:image', content: ogImage }],
+    ['meta', { name: 'twitter:image', content: image }],
     ['meta', { name: 'author', content: author.name }],
   ]
   if (modified && !isHome) head.push(['meta', { property: 'article:modified_time', content: modified }])
@@ -121,7 +124,7 @@ export function seoHead(page: PageData, srcDir: string): HeadConfig[] {
       runtimePlatform: 'PHP 8.4',
       license: 'https://opensource.org/licenses/MIT',
       author: { '@id': author['@id'] },
-      image: ogImage,
+      image,
     })
   } else {
     graph.push({
@@ -131,7 +134,7 @@ export function seoHead(page: PageData, srcDir: string): HeadConfig[] {
       description: pageDescription,
       url,
       inLanguage: locale.lang,
-      image: ogImage,
+      image,
       author: { '@id': author['@id'] },
       isPartOf: { '@id': `${siteUrl}#website` },
       ...(modified ? { dateModified: modified } : {}),

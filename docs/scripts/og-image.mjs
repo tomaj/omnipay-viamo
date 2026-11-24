@@ -1,4 +1,4 @@
-// Rasterize the hand-made SVGs: public/og.svg to public/og.png (1200 x 630, the social card),
+// Rasterize the hand-made SVGs: public/og.svg and og-sk.svg to public/og.png and og-sk.png (1200 x 630, the social cards),
 // and public/favicon.svg to the PNG icons, apple-touch-icon.png and favicon.ico.
 // Run after `python3 scripts/art.py`:  CHROME_PATH=/path/to/chrome node scripts/og-image.mjs
 import { readFileSync, writeFileSync } from 'node:fs'
@@ -19,6 +19,7 @@ async function render(svgFile, width, height, transparent) {
 }
 
 writeFileSync(pub('og.png'), await render('og.svg', 1200, 630, false))
+writeFileSync(pub('og-sk.png'), await render('og-sk.svg', 1200, 630, false))
 const icons = { 'favicon-16.png': 16, 'favicon-32.png': 32, 'apple-touch-icon.png': 180, 'icon-192.png': 192, 'icon-512.png': 512 }
 const png = {}
 for (const [name, size] of Object.entries(icons)) {
@@ -46,4 +47,4 @@ sizes.forEach((size, i) => {
   offset += png[size].length
 })
 writeFileSync(pub('favicon.ico'), Buffer.concat([header, ...sizes.map((size) => png[size])]))
-console.log('public/og.png, the PNG icons and favicon.ico written')
+console.log('public/og.png, og-sk.png, the PNG icons and favicon.ico written')
