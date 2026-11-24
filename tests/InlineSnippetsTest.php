@@ -95,9 +95,10 @@ final class InlineSnippetsTest extends TestCase
 
         return <<<PHP
             <?php
-            require {$autoload};
-            // deprecations raised inside dependencies (omnipay/common on PHP 8.6) are not the snippet's
+            // deprecations raised inside dependencies (omnipay/common on PHP 8.6, old polyfills with
+            // --prefer-lowest) are not the snippet's; set before the autoloader compiles them
             set_error_handler(static fn(int \$type, string \$message, string \$file): bool => \$type === E_DEPRECATED && str_contains(\$file, '/vendor/'));
+            require {$autoload};
             putenv('VIAMO_KEY1=' . {$key1});
             putenv('VIAMO_KEY2=' . {$key2});
             \$sign = new Omnipay\\Viamo\\Core\\ViamoSign();
