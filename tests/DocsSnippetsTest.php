@@ -6,6 +6,7 @@ namespace Omnipay\Viamo\Tests;
 
 use Omnipay\Viamo\Core\ViamoSign;
 use Omnipay\Viamo\Gateway;
+use Omnipay\Viamo\Message\CompletePurchaseResponse;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
@@ -47,7 +48,7 @@ final class DocsSnippetsTest extends TestCase
         $files = array_map(basename(...), $paths);
         sort($files);
 
-        self::assertSame(['complete-purchase.php', 'errors.php', 'gateway.php', 'purchase.php', 'signature.php', 'test-mode.php', 'webhook.php'], $files);
+        self::assertSame(['complete-purchase.php', 'errors.php', 'gateway.php', 'purchase.php', 'signature.php', 'test-mode.php', 'testing-phpunit.php', 'testing-return-url.php', 'testing-webhook.php', 'webhook.php'], $files);
     }
 
     public function testGateway(): void
@@ -105,6 +106,40 @@ final class DocsSnippetsTest extends TestCase
     public function testSignature(): void
     {
         self::assertSame('04B15D742A42AD489F05F2174C32DBBD', $this->capture('signature.php'));
+    }
+
+    public function testTestingReturnUrl(): void
+    {
+        $url = $this->capture('testing-return-url.php');
+        $query = [];
+        parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
+
+        self::assertStringStartsWith('https://shop.example/viamo/return?responseString=BID%3A42%2AVS%3A2026000123%2ARES%3AOK%2ASIG%3A', $url);
+        // signature computed with the openssl CLI
+        self::assertSame(['responseString' => 'BID:42*VS:2026000123*RES:OK*SIG:88F0AC8F3D9B94BB1C4241EDC85D4E40'], $query);
+        $response = $this->gateway($query)->completePurchase()->send();
+        self::assertTrue($response->isSuccessful());
+    }
+
+    public function testTestingWebhook(): void
+    {
+        $json = json_decode($this->capture('testing-webhook.php'), true);
+        self::assertIsArray($json);
+
+        $notification = $this->gateway()->webhook(['json' => $json])->send();
+        self::assertTrue($notification->isSuccessful());
+        self::assertSame('2026000123', $notification->getVs());
+        self::assertSame('555001', $notification->getPaymentId());
+        self::assertSame('N-1001', $notification->getNotificationId());
+    }
+
+    public function testTestingPhpunit(): void
+    {
+        $result = $this->execute('testing-phpunit.php');
+
+        self::assertInstanceOf(CompletePurchaseResponse::class, $result);
+        self::assertTrue($result->isSuccessful());
+        self::assertSame('2026000123', $result->getVs());
     }
 
     public function testErrors(): void

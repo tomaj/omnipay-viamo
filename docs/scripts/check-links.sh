@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Check snippet imports, build the VitePress site, and check links at the real GitHub Pages base.
+# Check snippet imports and SVGs, build the VitePress site, and check links at the real GitHub Pages base.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -8,15 +8,19 @@ port="${DOCS_LINK_PORT:-4173}"
 base="/omnipay-viamo/"
 
 python3 scripts/check-snippets.py
+python3 scripts/check-svg.py
 
 npm run docs:build
+python3 scripts/check-svg.py .vitepress/dist
+
+preview_log="$(mktemp)"
 
 if curl -sf -o /dev/null "http://127.0.0.1:${port}${base}"; then
   echo "Port ${port} is already in use" >&2
   exit 1
 fi
 
-./node_modules/.bin/vitepress preview --host 127.0.0.1 --port "$port" >"${TMPDIR:-/tmp}/docs-preview.log" 2>&1 &
+./node_modules/.bin/vitepress preview --host 127.0.0.1 --port "$port" >"$preview_log" 2>&1 &
 preview_pid=$!
 
 cleanup() {
@@ -35,7 +39,7 @@ for _ in $(seq 1 40); do
   fi
   if ! kill -0 "$preview_pid" 2>/dev/null; then
     echo "VitePress preview exited before it was ready" >&2
-    cat "${TMPDIR:-/tmp}/docs-preview.log" >&2 || true
+    cat "$preview_log" >&2 || true
     exit 1
   fi
   sleep 0.25
@@ -43,7 +47,7 @@ done
 
 if [[ "$ready" -ne 1 ]]; then
   echo "VitePress preview did not serve ${base}" >&2
-  cat "${TMPDIR:-/tmp}/docs-preview.log" >&2 || true
+  cat "$preview_log" >&2 || true
   exit 1
 fi
 
@@ -132,17 +136,23 @@ run_check() {
     "${skip_args[@]}"
 }
 
+linkinator_log="$(mktemp)"
+
 # 429 is a rate limit, not a broken link. 5xx from GitHub is retried a few times.
 attempt=1
 while true; do
   set +e
-  run_check 2>&1 | tee "${TMPDIR:-/tmp}/docs-linkinator.txt"
+  run_check 2>&1 | tee "$linkinator_log"
   status=${PIPESTATUS[0]}
   set -e
   if [[ "$status" -eq 0 ]]; then
     break
   fi
-  mapfile -t codes < <(grep -oE '\[[0-9]{3}\]' "${TMPDIR:-/tmp}/docs-linkinator.txt" | tr -d '[]' | sort -u)
+  # a while-read loop instead of mapfile: macOS ships bash 3.2
+  codes=()
+  while IFS= read -r code; do
+    codes+=("$code")
+  done < <(grep -oE '\[[0-9]{3}\]' "$linkinator_log" | tr -d '[]' | sort -u)
   if [[ ${#codes[@]} -eq 0 ]]; then
     exit "$status"
   fi

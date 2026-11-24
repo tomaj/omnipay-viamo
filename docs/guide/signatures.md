@@ -1,3 +1,7 @@
+---
+description: 'The Viamo signature algorithm (AES-128-ECB over the first 16 bytes of SHA-256), what is signed with which key, and how to check it with openssl.'
+---
+
 # Signatures
 
 Every message between your shop and Viamo carries a `SIG` (or `signature.sign`) computed by `Omnipay\Viamo\Core\ViamoSign`:
@@ -30,3 +34,7 @@ printf '%s' 'BID:42*VS:777*RES:OK' | openssl dgst -sha256 -binary | head -c 16 \
 `ViamoSign::verify()` compares the expected signature with the received one with `hash_equals()` (constant time). Hexadecimal case does not matter; a truncated, empty or non-string signature is rejected. `completePurchase()` and `webhook()` use it, so you do not need to call it yourself.
 
 A key that is not exactly 32 hexadecimal characters throws `InvalidKeyException` instead of signing with a wrong key.
+
+## Check it yourself
+
+The [signatures example](../examples/signatures) prints the signatures of a payment request, a return URL, a webhook and a UTF-8 message, and its `e2e.sh` recomputes every one with the `openssl` CLI, independently of PHP. UTF-8 text is signed as its bytes; nothing is normalised or encoded first.

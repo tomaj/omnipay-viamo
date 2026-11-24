@@ -1,0 +1,22 @@
+== order 2026000123: customer will pay
+shop checkout page: 200 "Pay 24.90 EUR for order 2026000123", QR code shown
+viamo app: signature ok, pay 24.90 EUR to merchant 42, VS 2026000123, "Order 2026000123"
+viamo webhook: 200 {"result":"paid"}
+return URL: 200 Thank you! Order 2026000123 is paid.
+
+== order 2026000124: customer will cancel
+shop checkout page: 200 "Pay 9.90 EUR for order 2026000124", QR code shown
+viamo app: signature ok, pay 9.90 EUR to merchant 42, VS 2026000124, "Order 2026000124"
+return URL: 200 The payment of order 2026000124 did not go through.
+
+== order 2026000125: customer will tamper
+shop checkout page: 200 "Pay 120.00 EUR for order 2026000125", QR code shown
+viamo app: request signature invalid, payment refused
+
+
+shop log:
+
+orders:
+  2026000123 24.90 EUR paid (by webhook)
+  2026000124 9.90 EUR failed
+  2026000125 120.00 EUR new
