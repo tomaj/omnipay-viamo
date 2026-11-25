@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Omnipay\Viamo\Message;
 
+use Omnipay\Common\Exception\InvalidRequestException;
 use Omnipay\Common\Message\AbstractRequest;
 use Omnipay\Viamo\Core\CredentialsParameters;
 use Omnipay\Viamo\Core\Str;
@@ -36,11 +37,17 @@ final class WebhookRequest extends AbstractRequest
 
     /**
      * @return array{}
+     * @throws InvalidRequestException when `bid` or `key2` is missing or empty, or `json` is missing
      */
     #[\Override]
     public function getData(): array
     {
-        $this->validate('bid', 'key2', 'json');
+        foreach (['bid', 'key2'] as $key) {
+            if (in_array($this->getParameter($key), [null, ''], true)) {
+                throw new InvalidRequestException("The {$key} parameter is required");
+            }
+        }
+        $this->validate('json');
 
         return [];
     }
@@ -84,6 +91,8 @@ final class WebhookRequest extends AbstractRequest
         if (!new ViamoSign()->verify($textToSign, (string) $this->getKey2(), $json['signature']['sign'])) {
             return $this->respond(['success' => false, 'error' => 'Wrong signature'] + $result);
         }
+        // Reported only once the signature over it is verified, as the exact text that was signed.
+        $result['amount'] = Str::from($payment['amount']);
         if ($payment['result'] !== 'OK') {
             return $this->respond(['success' => false, 'error' => 'Invalid result'] + $result);
         }

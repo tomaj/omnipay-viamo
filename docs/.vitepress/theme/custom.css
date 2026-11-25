@@ -1,0 +1,168 @@
+/**
+ * omnipay-viamo: the green member of the omnipay-* family.
+ * Overrides of the default theme variables:
+ * https://github.com/vuejs/vitepress/blob/main/src/client/theme-default/styles/vars.css
+ */
+
+:root {
+  --viamo-green: #0f9f55;
+  --vp-c-brand-1: #0b7f43;
+  --vp-c-brand-2: #0b8f4b;
+  --vp-c-brand-3: #0f9f55;
+  --vp-c-brand-soft: rgba(15, 159, 85, 0.14);
+
+  --vp-button-brand-bg: #0b7f43;
+  --vp-button-brand-hover-bg: #0b8f4b;
+  --vp-button-brand-active-bg: #0a6f3b;
+
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(120deg, #0b7f43 10%, #17b26a 90%);
+  --vp-home-hero-image-background-image: radial-gradient(closest-side, rgba(15, 159, 85, 0.22), transparent);
+  --vp-home-hero-image-filter: blur(44px);
+}
+
+.dark {
+  --vp-c-brand-1: #4ade80;
+  --vp-c-brand-2: #22c55e;
+  --vp-c-brand-3: #16a34a;
+  --vp-c-brand-soft: rgba(74, 222, 128, 0.16);
+
+  --vp-button-brand-text: #06140c;
+  --vp-button-brand-bg: #22c55e;
+  --vp-button-brand-hover-bg: #4ade80;
+  --vp-button-brand-hover-text: #06140c;
+  --vp-button-brand-active-bg: #16a34a;
+  --vp-button-brand-active-text: #06140c;
+
+  --vp-home-hero-name-background: linear-gradient(120deg, #4ade80 10%, #a7f3d0 90%);
+  --vp-home-hero-image-background-image: radial-gradient(closest-side, rgba(34, 197, 94, 0.18), transparent);
+}
+
+@media (min-width: 640px) {
+  :root {
+    --vp-home-hero-image-filter: blur(56px);
+  }
+}
+
+/* Hero illustration: a framed picture rather than a floating logo (640 x 560). */
+.VPHero .image .image-container {
+  width: 330px;
+  height: 289px;
+}
+
+.VPHero .image-container .image-src {
+  width: 100%;
+  max-width: 330px;
+  max-height: none;
+  border-radius: 20px;
+}
+
+@media (min-width: 640px) {
+  .VPHero .image .image-container {
+    width: 440px;
+    height: 385px;
+  }
+
+  .VPHero .image-container .image-src {
+    max-width: 440px;
+  }
+}
+
+@media (min-width: 960px) {
+  .VPHero .image .image-container {
+    width: 500px;
+    height: 438px;
+  }
+
+  .VPHero .image-container .image-src {
+    max-width: 500px;
+  }
+}
+
+/* VitePress pulls the title up under a small logo; the illustration needs the room. */
+@media (max-width: 959px) {
+  .VPHero.has-image .image {
+    margin-top: -48px;
+    margin-bottom: 8px;
+  }
+}
+
+.dark .VPHero img.image-src[src$="hero-light.svg"] {
+  content: url("/omnipay-viamo/illustrations/hero-dark.svg");
+}
+
+.dark .VPHero img.image-src[src$="hero-sk-light.svg"] {
+  content: url("/omnipay-viamo/illustrations/hero-sk-dark.svg");
+}
+
+.dark .VPFeature img[src$="qr.svg"] { content: url("/omnipay-viamo/icons/qr-dark.svg"); }
+.dark .VPFeature img[src$="verified.svg"] { content: url("/omnipay-viamo/icons/verified-dark.svg"); }
+.dark .VPFeature img[src$="webhook.svg"] { content: url("/omnipay-viamo/icons/webhook-dark.svg"); }
+.dark .VPFeature img[src$="key.svg"] { content: url("/omnipay-viamo/icons/key-dark.svg"); }
+.dark .VPFeature img[src$="omnipay.svg"] { content: url("/omnipay-viamo/icons/omnipay-dark.svg"); }
+.dark .VPFeature img[src$="offline.svg"] { content: url("/omnipay-viamo/icons/offline-dark.svg"); }
+
+/* Diagrams with a light and a dark variant: <img class="only-light"> + <img class="only-dark">. */
+.diagram {
+  margin: 1.5rem 0;
+}
+
+.diagram img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 16px;
+}
+
+.dark .diagram img.only-light,
+html:not(.dark) .diagram img.only-dark {
+  display: none;
+}
+
+/* The home page sections after the features. */
+.home-more {
+  max-width: 1152px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+}
+
+@media (min-width: 640px) {
+  .home-more {
+    padding: 0 48px 64px;
+  }
+}
+
+@media (min-width: 960px) {
+  .home-more {
+    padding: 0 64px 64px;
+  }
+}
+
+.home-more h2 {
+  margin: 48px 0 16px;
+  padding-top: 24px;
+  border-top: 1px solid var(--vp-c-divider);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.home-more p,
+.home-more li {
+  line-height: 1.7;
+}
+
+.home-more ul {
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+
+.home-more a {
+  color: var(--vp-c-brand-1);
+  font-weight: 500;
+}
+
+.home-more .vp-doc div[class*="language-"],
+.home-more div[class*="language-"] {
+  border-radius: 12px;
+}

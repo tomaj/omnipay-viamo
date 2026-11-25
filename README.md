@@ -1,17 +1,23 @@
-# Omnipay Viamo
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/public/logo-dark.svg">
+    <img alt="" src="docs/public/logo.svg" width="48" height="48" align="absmiddle">
+  </picture>
+  Omnipay Viamo
+</h1>
 
 **Viamo mobile payments gateway for the [Omnipay](https://omnipay.thephpleague.com/) payment processing library**
 
 **Documentation: https://tomaj.github.io/omnipay-viamo/**
 
-[Getting started](https://tomaj.github.io/omnipay-viamo/guide/getting-started) · [Operations](https://tomaj.github.io/omnipay-viamo/guide/operations) · [API reference](https://tomaj.github.io/omnipay-viamo/api/reference) · [Changelog](https://tomaj.github.io/omnipay-viamo/changelog)
+[Getting started](https://tomaj.github.io/omnipay-viamo/guide/getting-started) · [Payment flow](https://tomaj.github.io/omnipay-viamo/guide/payment-flow) · [Examples](https://tomaj.github.io/omnipay-viamo/examples/) · [API reference](https://tomaj.github.io/omnipay-viamo/api/reference) · [Changelog](https://tomaj.github.io/omnipay-viamo/changelog)
 
 [![Latest Stable Version](https://img.shields.io/packagist/v/tomaj/omnipay-viamo.svg)](https://packagist.org/packages/tomaj/omnipay-viamo)
 [![CI](https://github.com/tomaj/omnipay-viamo/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/tomaj/omnipay-viamo/actions/workflows/ci.yml?query=branch%3Amaster)
 [![Coverage Status](https://coveralls.io/repos/github/tomaj/omnipay-viamo/badge.svg?branch=master)](https://coveralls.io/github/tomaj/omnipay-viamo?branch=master)
 [![PHPStan](https://img.shields.io/badge/PHPStan-level%20max-brightgreen.svg)](https://phpstan.org/)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/tomaj/omnipay-viamo/badge)](https://scorecard.dev/viewer/?uri=github.com/tomaj/omnipay-viamo)
-[![Documentation](https://img.shields.io/badge/docs-5.x-4f46e5.svg)](https://tomaj.github.io/omnipay-viamo/)
+[![Documentation](https://img.shields.io/badge/docs-5.x-0f9f55.svg)](https://tomaj.github.io/omnipay-viamo/)
 [![License](https://img.shields.io/packagist/l/tomaj/omnipay-viamo.svg)](LICENSE.md)
 [![PHP Version](https://img.shields.io/packagist/dependency-v/tomaj/omnipay-viamo/php.svg)](https://packagist.org/packages/tomaj/omnipay-viamo)
 
@@ -55,7 +61,7 @@ $response = $gateway->purchase([
 ])->send();
 
 echo '<img src="data:image/png;base64,' . $response->getQrData() . '">';
-echo '<a href="' . htmlspecialchars($response->getAppLink()) . '">Pay in the Viamo app</a>';
+echo '<a href="' . htmlspecialchars((string) $response->getAppLink()) . '">Pay in the Viamo app</a>';
 
 // 2. On the return URL (?responseString=...)
 $result = $gateway->completePurchase()->send();
@@ -64,15 +70,18 @@ if ($result->isSuccessful()) {
 }
 
 // 3. On the webhook endpoint (JSON body)
-$notification = $gateway->webhook([
-    'json' => json_decode(file_get_contents('php://input'), true),
-])->send();
+$json = json_decode((string) file_get_contents('php://input'), true);
+$notification = $gateway->webhook(['json' => is_array($json) ? $json : []])->send();
 if ($notification->isSuccessful()) {
     markOrderPaid($notification->getVs());
 }
 ```
 
-Always look up the order by its variable symbol and compare the amount with your records before you mark it paid. The [documentation](https://tomaj.github.io/omnipay-viamo/) covers every parameter, test mode, the signature algorithm and the API reference.
+Always look up the order by its variable symbol and compare the amount with your records before you mark it paid. The [documentation](https://tomaj.github.io/omnipay-viamo/) covers every parameter, the payment flow, test mode, the signature algorithm and the API reference.
+
+## Examples
+
+[`examples/`](examples/) has complete recipes that run offline and are tested in CI against their expected output: a [QR checkout](https://tomaj.github.io/omnipay-viamo/examples/qr-checkout), a [return URL](https://tomaj.github.io/omnipay-viamo/examples/return-url) and a [webhook](https://tomaj.github.io/omnipay-viamo/examples/webhook) endpoint, a [whole shop paid by a fake Viamo app](https://tomaj.github.io/omnipay-viamo/examples/shop), and [signatures checked with openssl](https://tomaj.github.io/omnipay-viamo/examples/signatures).
 
 ## Upgrading
 

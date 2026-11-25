@@ -1,0 +1,16 @@
+sign 000102030405060708090a0b0c0d0e0f 5B0A9AE6F98801683C4D63687D2B3FD8 QP:1.0*BID:42*AM:24.90*CC:EUR*VS:2026000123*MSG:Order 2026000123
+sign 000102030405060708090a0b0c0d0e0f 88F0AC8F3D9B94BB1C4241EDC85D4E40 BID:42*VS:2026000123*RES:OK
+sign F0E1D2C3B4A5968778695A4B3C2D1E0F A88917626B50E704C2870E09B510EB03 R-772026000123E2E-2026000123OK24.90555001
+sign 000102030405060708090a0b0c0d0e0f BB84A7C38CB6C481AB02535109F087A4 QP:1.0*BID:42*AM:5.00*MSG:Ďakujeme za nákup
+verify same signature         true
+verify lowercase              true
+verify one character changed  false
+verify truncated              false
+verify empty                  false
+verify not a string           false
+key too short: Omnipay\Viamo\Exception\InvalidKeyException: The Viamo key must be 32 hexadecimal characters (a 128-bit key).
+key not hex: Omnipay\Viamo\Exception\InvalidKeyException: The Viamo key must be 32 hexadecimal characters (a 128-bit key).
+key 256-bit: Omnipay\Viamo\Exception\InvalidKeyException: The Viamo key must be 32 hexadecimal characters (a 128-bit key).
+purchase() with a wrong key1: Omnipay\Viamo\Exception\InvalidKeyException
+webhook() without json: Omnipay\Common\Exception\InvalidRequestException: The json parameter is required
+openssl: all 4 signatures match

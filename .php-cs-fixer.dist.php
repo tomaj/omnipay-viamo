@@ -5,6 +5,9 @@ declare(strict_types=1);
 $finder = PhpCsFixer\Finder::create()
     ->in(__DIR__ . '/src')
     ->in(__DIR__ . '/tests')
+    ->in(__DIR__ . '/docs/snippets')
+    ->in(__DIR__ . '/examples')
+    ->exclude('vendor')
     ->name('*.php')
     ->ignoreDotFiles(true)
     ->ignoreVCS(true);

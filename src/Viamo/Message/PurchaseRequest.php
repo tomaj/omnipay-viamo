@@ -6,6 +6,7 @@ namespace Omnipay\Viamo\Message;
 
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
+use Omnipay\Common\Exception\InvalidRequestException;
 use Omnipay\Common\Message\AbstractRequest;
 use Omnipay\Viamo\Core\CredentialsParameters;
 use Omnipay\Viamo\Core\Str;
@@ -23,6 +24,17 @@ final class PurchaseRequest extends AbstractRequest
     public const int QR_TEMPLATE = 300;
 
     /**
+     * Separates the `KEY:value` fields of the request string, so no value may contain it.
+     */
+    private const string FIELD_SEPARATOR = '*';
+
+    /**
+     * Payment symbols are integers of at most 10 digits, like `X-VS`, `X-SS` and `X-KS` in the Short Payment
+     * Descriptor format whose `KEY:value*KEY:value` layout the Viamo request string uses.
+     */
+    private const string SYMBOL_PATTERN = '/\A[0-9]{1,10}\z/';
+
+    /**
      * The URL Viamo returns the customer to, with the signed `responseString` appended.
      */
     public function getRurl(): ?string
@@ -36,7 +48,7 @@ final class PurchaseRequest extends AbstractRequest
     }
 
     /**
-     * Variable symbol: identifies the order in the payment result.
+     * Variable symbol: identifies the order in the payment result. Up to 10 digits.
      */
     public function getVs(): ?string
     {
@@ -49,7 +61,7 @@ final class PurchaseRequest extends AbstractRequest
     }
 
     /**
-     * Constant symbol.
+     * Constant symbol. Up to 10 digits.
      */
     public function getCs(): ?string
     {
@@ -62,7 +74,7 @@ final class PurchaseRequest extends AbstractRequest
     }
 
     /**
-     * Specific symbol.
+     * Specific symbol. Up to 10 digits.
      */
     public function getSs(): ?string
     {
@@ -75,7 +87,7 @@ final class PurchaseRequest extends AbstractRequest
     }
 
     /**
-     * Message for the payer.
+     * Message for the payer. Must not contain `*`, the field separator of the request string.
      */
     public function getMsg(): ?string
     {
@@ -114,12 +126,26 @@ final class PurchaseRequest extends AbstractRequest
     }
 
     /**
+     * Validates the parameters; the request string itself is built by sendData().
+     *
      * @return array{}
+     * @throws InvalidRequestException when `bid`, `key1` or `amount` is missing or empty, a payment symbol
+     *                                 is not up to 10 digits, or a field value contains `*`
      */
     #[\Override]
     public function getData(): array
     {
-        $this->validate('bid', 'key1', 'key2');
+        foreach (['bid', 'key1', 'amount'] as $key) {
+            if (in_array($this->getParameter($key), [null, ''], true)) {
+                throw new InvalidRequestException("The {$key} parameter is required");
+            }
+        }
+
+        foreach (['vs' => $this->getVs(), 'cs' => $this->getCs(), 'ss' => $this->getSs()] as $key => $value) {
+            if ($this->isFilled($value) && preg_match(self::SYMBOL_PATTERN, $value) !== 1) {
+                throw new InvalidRequestException("The {$key} parameter must be a number of at most 10 digits");
+            }
+        }
 
         return [];
     }
@@ -159,17 +185,17 @@ final class PurchaseRequest extends AbstractRequest
         $responseData = [
             'vs' => $this->getVs(),
             'template' => self::QR_TEMPLATE,
-            'qr_url' => $this->getQrEndpoint() . '?text=' . $requestString . '&template=' . self::QR_TEMPLATE,
+            'qr_url' => $this->getQrEndpoint() . '?' . http_build_query(['text' => $requestString, 'template' => self::QR_TEMPLATE], '', '&', PHP_QUERY_RFC3986),
             'qr_data' => base64_encode(new PngWriter()->write($qrCode)->getString()),
         ];
 
         $rurl = $this->getRurl();
         if ($this->isFilled($rurl)) {
-            $params['RURL'] = str_replace('*', '%2A', $rurl);
+            $params['RURL'] = str_replace(self::FIELD_SEPARATOR, '%2A', $rurl);
         }
 
         $app = $this->getTestMode() ? 'viamo-staging' : 'viamo';
-        $responseData['app_link'] = $app . '://?requestString=' . $this->prepareRequestString($params);
+        $responseData['app_link'] = $app . '://?requestString=' . rawurlencode($this->prepareRequestString($params));
 
         return $this->response = new PurchaseResponse($this, $responseData);
     }
@@ -191,15 +217,19 @@ final class PurchaseRequest extends AbstractRequest
 
     /**
      * @param array<string, ?string> $params
+     * @throws InvalidRequestException when a value contains the field separator `*`
      */
     private function prepareRequestString(array $params): string
     {
         $paramsStrings = [];
         foreach ($params as $key => $value) {
+            if (str_contains((string) $value, self::FIELD_SEPARATOR)) {
+                throw new InvalidRequestException('The ' . strtolower($key) . ' parameter must not contain "*", the field separator of the Viamo request string');
+            }
             $paramsStrings[] = $key . ':' . $value;
         }
 
-        $requestString = implode('*', $paramsStrings);
+        $requestString = implode(self::FIELD_SEPARATOR, $paramsStrings);
 
         return $requestString . '*SIG:' . new ViamoSign()->sign($requestString, (string) $this->getKey1());
     }
