@@ -21,6 +21,18 @@ description: 'Ako nahlásiť zraniteľnosť v omnipay-viamo, podporované verzie
 - Do `vs`, `cs`, `ss` a `msg` dávajte len hodnoty, ktoré má pod kontrolou váš e-shop: `*` oddeľuje polia reťazca požiadavky.
 - Návratovú URL aj webhook prevádzkujte cez HTTPS.
 
+## Kľúče v chybových hláseniach {#keys-in-error-reports}
+
+`key1` a `key2` sú označené `#[\SensitiveParameter]` všade, kde sú argumentom funkcie: `setKey1()`, `setKey2()`
+a `$secret` metód `ViamoSign::sign()` a `verify()`. Keď sa vyhodí výnimka a niektoré z týchto volaní je na zásobníku
+(napríklad `InvalidKeyException` pre kľúč so znakom nového riadka na konci), PHP v `getTraceAsString()` aj
+v chybových hláseniach (Tracy, Sentry, Monolog) zobrazí namiesto kľúča `Object(SensitiveParameterValue)`.
+
+Atribút nepokrýva hodnoty odovzdané v poli: `initialize(['key1' => ...])` ani `purchase([...])` sa v trase zobrazia
+ako `Array`, no nástroje, ktoré vypisujú argumenty celé, ich ukážu. V produkcii nastavte
+`zend.exception_ignore_args = On` (predvolená hodnota v `php.ini-production`): trasy potom neobsahujú žiadne
+argumenty.
+
 ## Podporované verzie
 
 Bezpečnostné opravy sa vydávajú pre tieto verzie:

@@ -16,7 +16,7 @@ final class ViamoSign
      * @param string $secret the 128-bit merchant key as 32 hexadecimal characters
      * @throws InvalidKeyException when the key is not 32 hexadecimal characters
      */
-    public function sign(string $input, string $secret): string
+    public function sign(string $input, #[\SensitiveParameter] string $secret): string
     {
         if (preg_match('/\A[0-9a-fA-F]{32}\z/', $secret) !== 1) {
             throw new InvalidKeyException('The Viamo key must be 32 hexadecimal characters (a 128-bit key).');
@@ -31,7 +31,7 @@ final class ViamoSign
     /**
      * Compares a received signature with the expected one in constant time. Hexadecimal case is ignored.
      */
-    public function verify(string $input, string $secret, mixed $signature): bool
+    public function verify(string $input, #[\SensitiveParameter] string $secret, mixed $signature): bool
     {
         if (!is_string($signature)) {
             return false;

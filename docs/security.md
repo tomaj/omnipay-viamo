@@ -21,4 +21,16 @@ description: 'How to report a vulnerability in omnipay-viamo, supported versions
 - Put only values your shop controls into `vs`, `cs`, `ss` and `msg`: `*` separates the fields of the request string.
 - Serve the return URL and the webhook over HTTPS.
 
+## Keys in error reports
+
+`key1` and `key2` are marked `#[\SensitiveParameter]` wherever they are a function argument: `setKey1()`, `setKey2()`
+and the `$secret` of `ViamoSign::sign()` and `verify()`. When an exception is thrown while one of these calls is on the
+stack (for example the `InvalidKeyException` for a key with a trailing newline), PHP shows
+`Object(SensitiveParameterValue)` instead of the key in `getTraceAsString()` and in error reports (Tracy, Sentry,
+Monolog).
+
+The attribute does not cover values passed inside an array: `initialize(['key1' => ...])` or `purchase([...])` appear
+in a trace as `Array`, and tools that dump arguments in full show them. Set `zend.exception_ignore_args = On` in
+production (the default of `php.ini-production`): traces then contain no arguments at all.
+
 <!--@include: ../SECURITY.md{3,}-->
