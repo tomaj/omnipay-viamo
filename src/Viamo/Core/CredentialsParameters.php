@@ -32,7 +32,7 @@ trait CredentialsParameters
         return Str::nullable($this->getParameter('key1'));
     }
 
-    public function setKey1(?string $value): static
+    public function setKey1(#[\SensitiveParameter] ?string $value): static
     {
         return $this->setParameter('key1', $value);
     }
@@ -45,7 +45,7 @@ trait CredentialsParameters
         return Str::nullable($this->getParameter('key2'));
     }
 
-    public function setKey2(?string $value): static
+    public function setKey2(#[\SensitiveParameter] ?string $value): static
     {
         return $this->setParameter('key2', $value);
     }

@@ -35,6 +35,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ### Security
 
+* Merchant keys are redacted from exception traces: the `$secret` of `ViamoSign::sign()` and `verify()` and the value of `setKey1()`/`setKey2()` are marked `#[\SensitiveParameter]`, so for example the `InvalidKeyException` for a malformed key no longer shows the key in its trace. Values passed in an `initialize()`/`purchase([...])` array are not covered; the security page recommends `zend.exception_ignore_args=On` ([#33](https://github.com/tomaj/omnipay-viamo/issues/33)).
 * **Security**: `purchase()` refuses a field value that contains `*`, the field separator of the request string, with `InvalidRequestException` instead of signing it (only `rurl` is escaped, as before), and requires `vs`, `cs` and `ss` to be numbers of at most 10 digits. **BREAKING CHANGE**: such values were accepted in 4.x; strip `*` from messages built from customer input ([#29](https://github.com/tomaj/omnipay-viamo/pull/29)).
 * **Security**: The return URL and webhook signatures are compared with `hash_equals()` in constant time instead of `!=`/`!==`; a non-string webhook signature is rejected ([#16](https://github.com/tomaj/omnipay-viamo/issues/16)).
 

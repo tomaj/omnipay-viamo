@@ -108,6 +108,8 @@ Dedí od `Omnipay\Common\Message\AbstractRequest` (preto sú `getAmount()`/`setA
 | `sign(string $input, string $secret): string` | Podpis ako 32 hexadecimálnych znakov veľkými písmenami; pri kľúči, ktorý nemá 32 hexadecimálnych znakov, vyhodí `InvalidKeyException` |
 | `verify(string $input, string $secret, mixed $signature): bool` | Porovnanie v konštantnom čase; nezáleží na veľkosti písmen; `false` pre podpis, ktorý nie je reťazec |
 
+Parameter `$secret` oboch metód a hodnota `setKey1()`/`setKey2()` sú označené `#[\SensitiveParameter]` ([Bezpečnosť](../security#keys-in-error-reports)).
+
 Pozrite [Podpisy](../guide/signatures).
 
 ## Výnimky

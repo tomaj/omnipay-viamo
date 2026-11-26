@@ -108,6 +108,8 @@ Also `getBid()`/`setBid()`, `getKey1()`/`setKey1()`, `getKey2()`/`setKey2()`.
 | `sign(string $input, string $secret): string` | Signature as 32 uppercase hex characters; throws `InvalidKeyException` for a key that is not 32 hex characters |
 | `verify(string $input, string $secret, mixed $signature): bool` | Constant-time comparison; case-insensitive; `false` for a non-string signature |
 
+The `$secret` of both methods and the value of `setKey1()`/`setKey2()` are marked `#[\SensitiveParameter]` ([Security](../security#keys-in-error-reports)).
+
 See [Signatures](../guide/signatures).
 
 ## Exceptions
