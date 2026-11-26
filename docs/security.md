@@ -29,8 +29,10 @@ stack (for example the `InvalidKeyException` for a key with a trailing newline),
 `Object(SensitiveParameterValue)` instead of the key in `getTraceAsString()` and in error reports (Tracy, Sentry,
 Monolog).
 
-The attribute does not cover values passed inside an array: `initialize(['key1' => ...])` or `purchase([...])` appear
-in a trace as `Array`, and tools that dump arguments in full show them. Set `zend.exception_ignore_args = On` in
+The attribute does not cover values passed inside an array or held by an object: `initialize(['key1' => ...])` or
+`purchase([...])` appear in a trace as `Array`, and the gateway or a request passed through your own code as
+`Object(...)`; tools that dump arguments in full (Tracy's BlueScreen, a `print_r()` of `getTrace()`) show the keys
+inside them. Set `zend.exception_ignore_args = On` in
 production (the default of `php.ini-production`): traces then contain no arguments at all.
 
 <!--@include: ../SECURITY.md{3,}-->

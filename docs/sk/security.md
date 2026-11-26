@@ -28,8 +28,9 @@ a `$secret` metód `ViamoSign::sign()` a `verify()`. Keď sa vyhodí výnimka a 
 (napríklad `InvalidKeyException` pre kľúč so znakom nového riadka na konci), PHP v `getTraceAsString()` aj
 v chybových hláseniach (Tracy, Sentry, Monolog) zobrazí namiesto kľúča `Object(SensitiveParameterValue)`.
 
-Atribút nepokrýva hodnoty odovzdané v poli: `initialize(['key1' => ...])` ani `purchase([...])` sa v trase zobrazia
-ako `Array`, no nástroje, ktoré vypisujú argumenty celé, ich ukážu. V produkcii nastavte
+Atribút nepokrýva hodnoty odovzdané v poli ani uložené v objekte: `initialize(['key1' => ...])` či `purchase([...])`
+sa v trase zobrazia ako `Array` a brána alebo požiadavka odovzdaná cez váš kód ako `Object(...)`; nástroje, ktoré
+vypisujú argumenty celé (BlueScreen v Tracy, `print_r()` z `getTrace()`), v nich kľúče ukážu. V produkcii nastavte
 `zend.exception_ignore_args = On` (predvolená hodnota v `php.ini-production`): trasy potom neobsahujú žiadne
 argumenty.
 
